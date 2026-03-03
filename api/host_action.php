@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/ably.php';
+
 
 $action = $_POST['action'] ?? null;
 $code   = $_POST['code'] ?? null;
@@ -49,6 +51,10 @@ switch ($action) {
 
         db()->commit();
 
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+
         json_response(['status' => 'ok']);
         break;
 
@@ -70,24 +76,40 @@ switch ($action) {
             WHERE id = ?
         ");
         $stmt->execute([$nextIndex, $countdown, $quiz['id']]);
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
         json_response(['status' => 'ok', 'questionIndex' => $nextIndex]);
         break;
 
     case 'show_answers':
         $stmt = db()->prepare("UPDATE quiz SET phase = 'answers' WHERE id = ?");
         $stmt->execute([$quiz['id']]);
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
         json_response(['status' => 'ok']);
         break;
 
     case 'show_standings':
         $stmt = db()->prepare("UPDATE quiz SET phase = 'standings' WHERE id = ?");
         $stmt->execute([$quiz['id']]);
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
         json_response(['status' => 'ok']);
         break;
 
     case 'finish_quiz':
         $stmt = db()->prepare("UPDATE quiz SET phase = 'finished' WHERE id = ?");
         $stmt->execute([$quiz['id']]);
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
         json_response(['status' => 'ok']);
         break;
 

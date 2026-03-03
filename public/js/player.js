@@ -56,7 +56,7 @@ async function joinQuiz() {
   token = data.token;
   playerName.textContent = nickname;
   show(waitingScreen);
-  startSSE();
+  startAbly();
 }
 
 async function loadMe() {
@@ -82,6 +82,17 @@ function startSSE() {
   evt.onerror = () => {
     console.log('SSE connection lost, browser will retry automatically.');
   };
+}
+
+function startAbly() {
+  const ablyKey = app.dataset.ablyKey;
+  const client = new Ably.Realtime(ablyKey);
+  const channel = client.channels.get('quiz-' + code);
+
+  channel.subscribe('state', (msg) => {
+    const data = msg.data;
+    handleStateUpdate(data);
+  });
 }
 
 function handleStateUpdate(data) {
@@ -206,7 +217,7 @@ joinBtn.addEventListener('click', joinQuiz);
     const ok = await loadMe();
     if (ok) {
       show(waitingScreen);
-      startSSE();
+      startAbly();
       return;
     }
   }

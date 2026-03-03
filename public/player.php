@@ -9,9 +9,10 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
   <title>Kahootino Quiz - Player</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 </head>
 <body class="player">
-  <div id="app" data-code="<?php echo htmlspecialchars($code); ?>">
+  <div id="app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>">
     <div id="join-screen">
       <h1>Kahootino Quiz</h1>
       <p>Your nickname:</p>

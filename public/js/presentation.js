@@ -22,6 +22,17 @@ function startSSEP() {
   };
 }
 
+function startAbly() {
+  const ablyKey = appP.dataset.ablyKey;
+  const client = new Ably.Realtime(ablyKey);
+  const channel = client.channels.get('quiz-' + codeP);
+
+  channel.subscribe('state', (msg) => {
+    const data = msg.data;
+    renderPresentation(data);
+  });
+}
+
 function renderPresentation(data) {
   if (data.question) {
     qText.textContent = data.question.text;
@@ -64,4 +75,4 @@ function renderPresentation(data) {
   }
 }
 
-startSSEP();
+startAbly();
