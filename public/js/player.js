@@ -114,7 +114,6 @@ function handleStateUpdate(data) {
     show(questionScreen);
   } else if (data.phase === 'reveal') {
     renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
-    answerStatus.textContent = 'Richtige Antwort:';
     show(questionScreen);
     stopCountdown();
   } else if (data.phase === 'standings' || data.phase === 'finished') {
