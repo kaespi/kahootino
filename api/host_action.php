@@ -51,6 +51,12 @@ switch ($action) {
 
         db()->commit();
 
+        // Update quiz array with new values
+        $quiz['phase'] = 'waiting';
+        $quiz['current_question'] = -1;
+        $quiz['question_start_time'] = null;
+        $quiz['question_end_time'] = null;
+
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
 
@@ -64,18 +70,22 @@ switch ($action) {
         if ($nextIndex >= $qCount) {
             json_response(['error' => 'No more questions'], 400);
         }
-        $q = $questions['questions'][$nextIndex];
-        $countdown = (int)$q['countdownSeconds'];
 
         $stmt = db()->prepare("
             UPDATE quiz
             SET phase = 'question',
                 current_question = ?,
-                question_start_time = NOW(),
-                question_end_time = DATE_ADD(NOW(), INTERVAL ? SECOND)
+                question_start_time = NULL,
+                question_end_time = NULL
             WHERE id = ?
         ");
-        $stmt->execute([$nextIndex, $countdown, $quiz['id']]);
+        $stmt->execute([$nextIndex, $quiz['id']]);
+
+        // Update quiz array with new values
+        $quiz['phase'] = 'question';
+        $quiz['current_question'] = $nextIndex;
+        $quiz['question_start_time'] = null;
+        $quiz['question_end_time'] = null;
 
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
@@ -84,8 +94,26 @@ switch ($action) {
         break;
 
     case 'show_answers':
-        $stmt = db()->prepare("UPDATE quiz SET phase = 'answers' WHERE id = ?");
-        $stmt->execute([$quiz['id']]);
+        $questions = load_questions();
+        $currentIndex = (int)$quiz['current_question'];
+        $q = $questions['questions'][$currentIndex];
+        $countdown = (int)$q['countdownSeconds'];
+
+        $now = date('Y-m-d H:i:s');
+        $endTime = date('Y-m-d H:i:s', strtotime("+$countdown seconds"));
+        $stmt = db()->prepare("
+            UPDATE quiz
+            SET phase = 'answers',
+                question_start_time = ?,
+                question_end_time = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([$now, $endTime, $quiz['id']]);
+
+        // Update quiz array with new values
+        $quiz['phase'] = 'answers';
+        $quiz['question_start_time'] = $now;
+        $quiz['question_end_time'] = $endTime;
 
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
@@ -97,6 +125,9 @@ switch ($action) {
         $stmt = db()->prepare("UPDATE quiz SET phase = 'standings' WHERE id = ?");
         $stmt->execute([$quiz['id']]);
 
+        // Update quiz array with new value
+        $quiz['phase'] = 'standings';
+
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
 
@@ -106,6 +137,9 @@ switch ($action) {
     case 'finish_quiz':
         $stmt = db()->prepare("UPDATE quiz SET phase = 'finished' WHERE id = ?");
         $stmt->execute([$quiz['id']]);
+
+        // Update quiz array with new value
+        $quiz['phase'] = 'finished';
 
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);

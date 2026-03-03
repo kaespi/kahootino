@@ -15,7 +15,7 @@ if (!$quiz) {
     json_response(['error' => 'Quiz not found'], 404);
 }
 
-if ($quiz['phase'] !== 'question') {
+if ($quiz['phase'] !== 'answers') {
     json_response(['error' => 'Not accepting answers now'], 400);
 }
 

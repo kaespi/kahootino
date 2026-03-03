@@ -14,6 +14,7 @@ const playerName = document.getElementById('player-name');
 const questionText = document.getElementById('question-text');
 const questionImage = document.getElementById('question-image');
 const answersDiv = document.getElementById('answers');
+const countdownContainer = document.getElementById('countdown-container');
 const countdownBar = document.getElementById('countdown-bar');
 const answerStatus = document.getElementById('answer-status');
 const standingsList = document.getElementById('standings-list');
@@ -106,10 +107,11 @@ function handleStateUpdate(data) {
   } else if (data.phase === 'question') {
     renderQuestion(data.question, data.serverTime, data.questionEndTime);
     show(questionScreen);
-  } else if (data.phase === 'answers') {
-    answerStatus.textContent = hasAnswered ? 'Warte auf die Rangliste…' : 'Zu spät für eine Antwort.';
-    show(questionScreen);
     stopCountdown();
+  } else if (data.phase === 'answers') {
+    lastRenderedQuestionIndex = -1;
+    renderQuestion(data.question, data.serverTime, data.questionEndTime);
+    show(questionScreen);
   } else if (data.phase === 'standings' || data.phase === 'finished') {
     renderStandings(data.standings || []);
     show(standingsScreen);
@@ -120,20 +122,25 @@ function handleStateUpdate(data) {
 function renderQuestion(q, serverTime, endTime) {
   if (!q) return;
   questionText.textContent = q.text;
-  if (q.image) {
+  if (q.image && !endTime) {
     questionImage.src = '../' + q.image;
     questionImage.classList.remove('hidden');
   } else {
     questionImage.classList.add('hidden');
   }
   answersDiv.innerHTML = '';
-  q.answers.forEach((ans, idx) => {
-    const btn = document.createElement('button');
-    btn.textContent = ans;
-    btn.disabled = hasAnswered;
-    btn.addEventListener('click', () => submitAnswer(idx));
-    answersDiv.appendChild(btn);
-  });
+
+  // Only render answer buttons if endTime is set (answers should be visible)
+  if (endTime) {
+    q.answers.forEach((ans, idx) => {
+      const btn = document.createElement('button');
+      btn.textContent = ans;
+      btn.disabled = hasAnswered;
+      btn.addEventListener('click', () => submitAnswer(idx));
+      answersDiv.appendChild(btn);
+    });
+  }
+
   answerStatus.textContent = hasAnswered ? 'Antwort abgegeben.' : '';
 
   if (serverTime && endTime && currentQuestionIndex !== lastRenderedQuestionIndex) {
@@ -163,7 +170,6 @@ async function submitAnswer(idx) {
     return;
   }
   hasAnswered = true;
-  answerStatus.textContent = data.isCorrect ? `Richtig! +${data.points} Punkte` : 'Falsche Antwort.';
   Array.from(answersDiv.querySelectorAll('button')).forEach(b => b.disabled = true);
 }
 
@@ -177,9 +183,16 @@ function renderStandings(list) {
 }
 
 function startCountdown(seconds) {
-  stopCountdown();
-  if (!countdownBar) return;
+  if (seconds <= 0) {
+    if (countdownContainer) {
+      countdownContainer.classList.add('hidden');
+    }
+    return;
+  }
+  if (countdownInterval) return; // Already running
+  if (!countdownBar || !countdownContainer) return;
   totalQuestionTime = seconds;
+  countdownContainer.classList.remove('hidden');
   countdownBar.style.width = '100%';
   let remaining = seconds;
   updateCountdownDisplay(remaining);
@@ -200,6 +213,9 @@ function stopCountdown() {
   if (countdownInterval) {
     clearInterval(countdownInterval);
     countdownInterval = null;
+  }
+  if (countdownContainer) {
+    countdownContainer.classList.add('hidden');
   }
 }
 

@@ -36,14 +36,17 @@ function startAbly() {
 function renderPresentation(data) {
   if (data.question) {
     qText.textContent = data.question.text;
-    if (data.question.image) {
+    if (data.question.image && !data.questionEndTime) {
       qImage.src = '../' + data.question.image;
       qImage.classList.remove('hidden');
     } else {
       qImage.classList.add('hidden');
     }
     qAnswers.innerHTML = '';
-    data.question.answers.forEach((a, idx) => {
+
+    // Only render answers if questionEndTime is set (answers are revealed)
+    if (data.questionEndTime) {
+      data.question.answers.forEach((a, idx) => {
         const li = document.createElement('li');
         li.textContent = a;
 
@@ -54,8 +57,9 @@ function renderPresentation(data) {
         }
 
         qAnswers.appendChild(li);
-    });
-} else {
+      });
+    }
+  } else {
     qText.textContent = '';
     qAnswers.innerHTML = '';
     qImage.classList.add('hidden');
