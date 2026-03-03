@@ -1,0 +1,96 @@
+<?php
+require_once __DIR__ . '/../config.php';
+
+$action = $_POST['action'] ?? null;
+$code   = $_POST['code'] ?? null;
+
+if (!$action || !$code) {
+    json_response(['error' => 'Missing action or code'], 400);
+}
+
+$quiz = get_quiz_by_code($code);
+$questions = load_questions();
+$qCount = count($questions['questions']);
+
+if (!$quiz && $action !== 'init_quiz') {
+    json_response(['error' => 'Quiz not found'], 404);
+}
+
+switch ($action) {
+    case 'init_quiz':
+        if (!$quiz) {
+            $stmt = db()->prepare("INSERT INTO quiz (code, title) VALUES (?, ?)");
+            $stmt->execute([$code, $questions['title']]);
+        }
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'start_quiz':
+        db()->beginTransaction();
+
+        // Reset quiz state
+        $stmt = db()->prepare("
+            UPDATE quiz
+            SET phase = 'waiting',
+                current_question = -1,
+                question_start_time = NULL,
+                question_end_time = NULL
+            WHERE id = ?
+        ");
+        $stmt->execute([$quiz['id']]);
+
+        // Delete all answers
+        $stmt = db()->prepare("DELETE FROM answer WHERE quiz_id = ?");
+        $stmt->execute([$quiz['id']]);
+
+        // Reset all scores
+        $stmt = db()->prepare("DELETE FROM player WHERE quiz_id = ?");
+        $stmt->execute([$quiz['id']]);
+
+        db()->commit();
+
+        json_response(['status' => 'ok']);
+        break;
+
+
+    case 'show_question':
+        $nextIndex = $quiz['current_question'] + 1;
+        if ($nextIndex >= $qCount) {
+            json_response(['error' => 'No more questions'], 400);
+        }
+        $q = $questions['questions'][$nextIndex];
+        $countdown = (int)$q['countdownSeconds'];
+
+        $stmt = db()->prepare("
+            UPDATE quiz
+            SET phase = 'question',
+                current_question = ?,
+                question_start_time = NOW(),
+                question_end_time = DATE_ADD(NOW(), INTERVAL ? SECOND)
+            WHERE id = ?
+        ");
+        $stmt->execute([$nextIndex, $countdown, $quiz['id']]);
+        json_response(['status' => 'ok', 'questionIndex' => $nextIndex]);
+        break;
+
+    case 'show_answers':
+        $stmt = db()->prepare("UPDATE quiz SET phase = 'answers' WHERE id = ?");
+        $stmt->execute([$quiz['id']]);
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'show_standings':
+        $stmt = db()->prepare("UPDATE quiz SET phase = 'standings' WHERE id = ?");
+        $stmt->execute([$quiz['id']]);
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'finish_quiz':
+        $stmt = db()->prepare("UPDATE quiz SET phase = 'finished' WHERE id = ?");
+        $stmt->execute([$quiz['id']]);
+        json_response(['status' => 'ok']);
+        break;
+
+    default:
+        json_response(['error' => 'Unknown action'], 400);
+}

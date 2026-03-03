@@ -1,0 +1,47 @@
+<?php
+require_once __DIR__ . '/../config.php';
+$code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
+?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Kahootino Quiz - Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="player">
+  <div id="app" data-code="<?php echo htmlspecialchars($code); ?>">
+    <div id="join-screen">
+      <h1>Kahootino Quiz</h1>
+      <p>Your nickname:</p>
+      <input type="text" id="nickname" maxlength="64">
+      <button id="join-btn">Join</button>
+      <div id="join-error" class="error"></div>
+    </div>
+
+    <div id="waiting-screen" class="hidden">
+      <h2>Wait for the start of the quiz…</h2>
+      <p id="player-name"></p>
+    </div>
+
+    <div id="question-screen" class="hidden">
+      <h2 id="question-text"></h2>
+      <img id="question-image" class="hidden" alt="">
+      <div id="answers"></div>
+      <div id="countdown-container">
+        <div id="countdown-bar"></div>
+        <div id="countdown-text"></div>
+      </div>
+      <div id="answer-status"></div>
+    </div>
+
+    <div id="standings-screen" class="hidden">
+      <h2>Standings</h2>
+      <ol id="standings-list"></ol>
+    </div>
+  </div>
+
+  <script src="js/player.js"></script>
+</body>
+</html>

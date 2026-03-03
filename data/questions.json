@@ -1,0 +1,31 @@
+{
+  "title": "Anna & Tom Wedding Quiz",
+  "questions": [
+    {
+      "text": "Wo haben sich Anna und Tom zum ersten Mal getroffen?",
+      "image": "data/images/q1_meet.jpg",
+      "answers": [
+        "An der Universität",
+        "An einem Konzert",
+        "Bei der Arbeit",
+        "Auf einer Wanderung"
+      ],
+      "correctIndex": 1,
+      "countdownSeconds": 20,
+      "maxPoints": 1000
+    },
+    {
+      "text": "Was ist ihr Lieblingsreiseziel?",
+      "image": "data/images/q2_holiday.jpg",
+      "answers": [
+        "Italien",
+        "Island",
+        "Portugal",
+        "Japan"
+      ],
+      "correctIndex": 0,
+      "countdownSeconds": 15,
+      "maxPoints": 1000
+    }
+  ]
+}
