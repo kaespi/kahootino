@@ -105,13 +105,18 @@ function handleStateUpdate(data) {
     show(waitingScreen);
     stopCountdown();
   } else if (data.phase === 'question') {
-    renderQuestion(data.question, data.serverTime, data.questionEndTime);
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
     show(questionScreen);
     stopCountdown();
   } else if (data.phase === 'answers') {
     lastRenderedQuestionIndex = -1;
-    renderQuestion(data.question, data.serverTime, data.questionEndTime);
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
     show(questionScreen);
+  } else if (data.phase === 'reveal') {
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
+    answerStatus.textContent = 'Richtige Antwort:';
+    show(questionScreen);
+    stopCountdown();
   } else if (data.phase === 'standings' || data.phase === 'finished') {
     renderStandings(data.standings || []);
     show(standingsScreen);
@@ -119,7 +124,7 @@ function handleStateUpdate(data) {
   }
 }
 
-function renderQuestion(q, serverTime, endTime) {
+function renderQuestion(q, serverTime, endTime, phase) {
   if (!q) return;
   questionText.textContent = q.text;
   if (q.image && !endTime) {
@@ -135,8 +140,15 @@ function renderQuestion(q, serverTime, endTime) {
     q.answers.forEach((ans, idx) => {
       const btn = document.createElement('button');
       btn.textContent = ans;
-      btn.disabled = hasAnswered;
+      btn.disabled = hasAnswered || phase === 'reveal';
       btn.addEventListener('click', () => submitAnswer(idx));
+
+      // Mark correct answer in reveal phase
+      if (phase === 'reveal' && idx === q.correctIndex) {
+        btn.style.backgroundColor = '#90EE90';
+        btn.style.fontWeight = 'bold';
+      }
+
       answersDiv.appendChild(btn);
     });
   }

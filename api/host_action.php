@@ -121,6 +121,19 @@ switch ($action) {
         json_response(['status' => 'ok']);
         break;
 
+    case 'reveal':
+        $stmt = db()->prepare("UPDATE quiz SET phase = 'reveal' WHERE id = ?");
+        $stmt->execute([$quiz['id']]);
+
+        // Update quiz array with new value
+        $quiz['phase'] = 'reveal';
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok']);
+        break;
+
     case 'show_standings':
         $stmt = db()->prepare("UPDATE quiz SET phase = 'standings' WHERE id = ?");
         $stmt->execute([$quiz['id']]);

@@ -50,8 +50,8 @@ function renderPresentation(data) {
         const li = document.createElement('li');
         li.textContent = a;
 
-        // Nur bei reveal answers markieren
-        if (data.phase === 'answers' && data.question.correctIndex === idx) {
+        // Mark correct answer in 'reveal' phase
+        if ((data.phase === 'reveal') && data.question.correctIndex === idx) {
             li.style.color = 'yellow';
             li.style.fontWeight = 'bold';
         }
