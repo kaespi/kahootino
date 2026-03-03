@@ -34,9 +34,9 @@ function startAbly() {
 }
 
 function renderPresentation(data) {
-  if (data.question) {
+  if (data.question && data.phase !== 'standings' && data.phase !== 'finished') {
     qText.textContent = data.question.text;
-    if (data.question.image) {
+    if (data.question.image && data.phase !== 'standings' && data.phase !== 'finished') {
       qImage.src = '../' + data.question.image;
       qImage.classList.remove('hidden');
     } else {
@@ -68,9 +68,9 @@ function renderPresentation(data) {
   if (data.phase === 'standings' || data.phase === 'finished') {
     sTitle.classList.remove('hidden');
     sList.innerHTML = '';
-    (data.standings || []).forEach(p => {
+    (data.standings || []).forEach((p, idx) => {
       const li = document.createElement('li');
-      li.textContent = `${p.nickname} – ${p.score} Punkte`;
+      li.textContent = `${idx + 1}. ${p.nickname} – ${p.score} Punkte`;
       sList.appendChild(li);
     });
   } else {

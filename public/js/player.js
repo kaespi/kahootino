@@ -187,7 +187,7 @@ async function submitAnswer(idx) {
 
 function renderStandings(list) {
   standingsList.innerHTML = '';
-  list.forEach(p => {
+  list.forEach((p, idx) => {
     const li = document.createElement('li');
     li.textContent = `${p.nickname} – ${p.score} Punkte`;
     standingsList.appendChild(li);
