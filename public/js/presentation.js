@@ -36,7 +36,7 @@ function startAbly() {
 function renderPresentation(data) {
   if (data.question) {
     qText.textContent = data.question.text;
-    if (data.question.image && !data.questionEndTime) {
+    if (data.question.image) {
       qImage.src = '../' + data.question.image;
       qImage.classList.remove('hidden');
     } else {
