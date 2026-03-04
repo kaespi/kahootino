@@ -26,6 +26,11 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
       <p id="player-name"></p>
     </div>
 
+    <div id="rejoined-screen" class="hidden">
+      <h2>Wait for the quiz to continue…</h2>
+      <p id="player-name"></p>
+    </div>
+
     <div id="question-screen" class="hidden">
       <h2 id="question-text"></h2>
       <img id="question-image" class="hidden" alt="">

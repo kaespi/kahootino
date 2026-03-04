@@ -3,6 +3,7 @@ const code = app.dataset.code;
 
 const joinScreen = document.getElementById('join-screen');
 const waitingScreen = document.getElementById('waiting-screen');
+const rejoinedScreen = document.getElementById('rejoined-screen');
 const questionScreen = document.getElementById('question-screen');
 const standingsScreen = document.getElementById('standings-screen');
 
@@ -10,6 +11,14 @@ const nicknameInput = document.getElementById('nickname');
 const joinBtn = document.getElementById('join-btn');
 const joinError = document.getElementById('join-error');
 const playerName = document.getElementById('player-name');
+
+// Check for reset parameter
+const params = new URLSearchParams(window.location.search);
+if (params.get('reset') === '1') {
+  localStorage.removeItem('quiz_nickname');
+  localStorage.removeItem('quiz_player_token');
+  localStorage.removeItem('quiz_code');
+}
 
 const questionText = document.getElementById('question-text');
 const questionImage = document.getElementById('question-image');
@@ -33,7 +42,7 @@ function getCookie(name) {
 }
 
 function show(screen) {
-  [joinScreen, waitingScreen, questionScreen, standingsScreen].forEach(s => s.classList.add('hidden'));
+  [joinScreen, waitingScreen, rejoinedScreen, questionScreen, standingsScreen].forEach(s => s.classList.add('hidden'));
   screen.classList.remove('hidden');
 }
 
@@ -55,6 +64,10 @@ async function joinQuiz() {
     return;
   }
   token = data.token;
+  // Store nickname and token in localStorage for persistence
+  localStorage.setItem('quiz_nickname', nickname);
+  localStorage.setItem('quiz_player_token', token);
+  localStorage.setItem('quiz_code', code);
   playerName.textContent = nickname;
   show(waitingScreen);
   startAbly();
@@ -240,6 +253,26 @@ function updateCountdownDisplay(sec) {
 joinBtn.addEventListener('click', joinQuiz);
 
 (async function init() {
+  // Check localStorage first for persisted session
+  const storedToken = localStorage.getItem('quiz_player_token');
+  const storedNickname = localStorage.getItem('quiz_nickname');
+  const storedCode = localStorage.getItem('quiz_code');
+
+  if (storedToken && storedCode === code) {
+    token = storedToken;
+    const ok = await loadMe();
+    if (ok) {
+      show(rejoinedScreen);
+      startAbly();
+      return;
+    }
+    // If loadMe failed, clear stored session and show join screen
+    localStorage.removeItem('quiz_player_token');
+    localStorage.removeItem('quiz_nickname');
+    localStorage.removeItem('quiz_code');
+  }
+
+  // Fallback to cookie-based token
   if (token) {
     const ok = await loadMe();
     if (ok) {
