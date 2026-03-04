@@ -77,3 +77,162 @@ button {
   font-size: 0.9rem;
   color: #666;
 }
+
+/* Host styling */
+.host {
+  background: #f9f9f9;
+}
+
+.host h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.host p {
+  margin: 0.3rem 0;
+  color: #666;
+}
+
+#host-controls {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+#host-controls button {
+  padding: 0.7rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#host-controls button:hover {
+  background: #0056b3;
+}
+
+#host-status {
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 4px;
+  color: #004085;
+}
+
+#host-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+section h2 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+}
+
+#questions-list {
+  list-style-position: inside;
+  padding: 0;
+  margin: 0;
+}
+
+#questions-list li {
+  padding: 0.6rem 0.8rem;
+  margin: 0.4rem 0;
+  background: #f9f9f9;
+  border-left: 3px solid #ddd;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+#questions-list li.current-question {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+}
+
+#host-countdown {
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  color: #007bff;
+  padding: 2rem 1rem;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border: 2px solid #007bff;
+}
+
+#host-standings-list {
+  list-style-position: inside;
+  padding: 0;
+  margin: 0;
+}
+
+#host-standings-list li {
+  padding: 0.8rem 1rem;
+  margin: 0.5rem 0;
+  background: #f9f9f9;
+  border-radius: 4px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#host-standings-list li:first-child {
+  background: #fff3cd;
+  font-weight: bold;
+  color: #333;
+  border-left: 4px solid #ffc107;
+}
+
+#host-standings-list li:nth-child(2) {
+  background: #f0f0f0;
+  border-left: 4px solid #c0c0c0;
+}
+
+#host-standings-list li:nth-child(3) {
+  background: #f5f0e8;
+  border-left: 4px solid #cd7f32;
+}
+
+@media (max-width: 768px) {
+  #host-controls {
+    flex-direction: column;
+  }
+
+  #host-controls button {
+    width: 100%;
+  }
+
+  #host-countdown {
+    font-size: 2.5rem;
+    padding: 1rem;
+  }
+
+  section {
+    padding: 1rem;
+  }
+}
