@@ -220,11 +220,66 @@ async function submitAnswer(idx) {
 
 function renderStandings(list) {
   standingsList.innerHTML = '';
-  list.forEach((p, idx) => {
+
+  if (!list || list.length === 0) return;
+
+  const total = list.length;
+  const topCount = Math.min(3, total);
+
+  // Determine current player's nickname (from DOM or localStorage)
+  const myNick = (playerName && playerName.textContent) || localStorage.getItem('quiz_nickname') || null;
+  const myIdx = myNick ? list.findIndex(p => p.nickname === myNick) : -1;
+
+  // Build set of indices to display: always top 3, plus personal slice if available
+  const idxSet = new Set();
+  for (let i = 0; i < topCount; i++) idxSet.add(i);
+
+  if (myIdx !== -1) {
+    const pStart = Math.max(0, myIdx - 2);
+    const pEnd = Math.min(total - 1, myIdx + 2);
+    for (let i = pStart; i <= pEnd; i++) idxSet.add(i);
+  } else {
+    // If current player unknown, ensure at least 5 entries by showing more after top
+    for (let i = topCount; i < Math.min(total, 5); i++) idxSet.add(i);
+  }
+
+  // Ensure at least 5 entries are shown when possible
+  let indices = Array.from(idxSet).sort((a, b) => a - b);
+  let last = indices.length ? indices[indices.length - 1] : -1;
+  while (indices.length < Math.min(5, total)) {
+    const next = last + 1;
+    if (next >= total) break;
+    idxSet.add(next);
+    indices = Array.from(idxSet).sort((a, b) => a - b);
+    last = indices[indices.length - 1];
+  }
+
+  // Render with separators for gaps > 1 and trailing '...' if there are undisplayed entries
+  indices = Array.from(idxSet).sort((a, b) => a - b);
+  let prev = -1;
+  for (let k = 0; k < indices.length; k++) {
+    const i = indices[k];
+    if (prev !== -1 && i - prev > 1) {
+      const sep = document.createElement('li');
+      sep.className = 'standings-sep';
+      sep.textContent = '...';
+      standingsList.appendChild(sep);
+    }
+    const p = list[i];
     const li = document.createElement('li');
-    li.textContent = `${p.nickname} – ${p.score} Punkte`;
+    if (i === myIdx) li.className = 'you-standing';
+    li.textContent = `${i + 1}. ${p.nickname} – ${p.score} Punkte`;
     standingsList.appendChild(li);
-  });
+    prev = i;
+  }
+
+  const lastDisplayed = indices.length ? indices[indices.length - 1] : -1;
+  if (lastDisplayed < total - 1) {
+    const sep = document.createElement('li');
+    sep.className = 'standings-sep';
+    sep.textContent = '...';
+    standingsList.appendChild(sep);
+  }
 }
 
 function startCountdown(seconds) {

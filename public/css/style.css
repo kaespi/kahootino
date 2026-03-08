@@ -242,6 +242,46 @@ section h2 {
   border-left: 4px solid #cd7f32;
 }
 
+/* Player standings tweaks */
+#standings-list {
+  list-style-position: inside;
+  padding: 0;
+  margin: 0;
+}
+
+#standings-list li {
+  padding: 0.6rem 0.8rem;
+  margin: 0.3rem 0;
+  background: #fff;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.you-standing {
+  background: #e8f4ff;
+  outline: 2px solid #2196F3;
+}
+
+.standings-sep {
+  text-align: center;
+  background: transparent;
+  font-style: italic;
+  color: #666;
+}
+.you-standing {
+  background: #e8f4ff;
+  outline: 2px solid #2196F3;
+}
+
+.standings-sep {
+  text-align: center;
+  background: transparent;
+  font-style: italic;
+  color: #666;
+}
+
 @media (max-width: 768px) {
   #host-controls {
     flex-direction: column;

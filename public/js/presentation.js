@@ -68,7 +68,9 @@ function renderPresentation(data) {
   if (data.phase === 'standings' || data.phase === 'finished') {
     sTitle.classList.remove('hidden');
     sList.innerHTML = '';
-    (data.standings || []).forEach((p, idx) => {
+    // Only show top 10 on the presentation screen
+    const tops = (data.standings || []).slice(0, 10);
+    tops.forEach((p, idx) => {
       const li = document.createElement('li');
       li.textContent = `${idx + 1}. ${p.nickname} – ${p.score} Punkte`;
       sList.appendChild(li);
