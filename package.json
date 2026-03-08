@@ -1,0 +1,15 @@
+{
+  "name": "kahootino-simulator",
+  "version": "1.0.0",
+  "description": "Puppeteer-based simulator for Kahootino players",
+  "main": "tools/simulate_players.js",
+  "scripts": {
+    "simulate": "node tools/simulate_players.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^19.0.0",
+    "node-fetch": "^2.6.7"
+  }
+}

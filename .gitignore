@@ -1,2 +1,5 @@
 config.local.php
 deploy.ps1
+
+node_modules/
+package-lock.json
