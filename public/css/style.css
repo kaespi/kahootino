@@ -15,6 +15,30 @@ body {
   font-size: 1.1rem;
 }
 
+/* Answer button states */
+.player #answers button.selected {
+  outline: 3px solid #2196F3;
+  background: #e8f4ff;
+}
+
+.player #answers button.correct {
+  background: #90EE90;
+  font-weight: bold;
+  border: 2px solid #2e7d32;
+}
+
+.player #answers button.wrong {
+  background: #f8d7da;
+  color: #721c24;
+  border: 2px solid #c82333;
+}
+
+/* Disabled answers look muted */
+.player #answers button:disabled {
+  opacity: 0.85;
+  cursor: default;
+}
+
 .error { color: red; }
 
 .presentation {

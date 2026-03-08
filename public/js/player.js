@@ -35,6 +35,8 @@ let countdownInterval = null;
 let questionEndTime = null;
 let totalQuestionTime = 0;
 let lastRenderedQuestionIndex = -1;
+// store selected answer per question index so selection survives phase updates
+let selectedByQuestion = {};
 
 function getCookie(name) {
   const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -152,13 +154,32 @@ function renderQuestion(q, serverTime, endTime, phase) {
     q.answers.forEach((ans, idx) => {
       const btn = document.createElement('button');
       btn.textContent = ans;
+      btn.className = 'answer-button';
+      btn.dataset.index = idx;
       btn.disabled = hasAnswered || phase === 'reveal';
-      btn.addEventListener('click', () => submitAnswer(idx));
 
-      // Mark correct answer in reveal phase
-      if (phase === 'reveal' && idx === q.correctIndex) {
-        btn.style.backgroundColor = '#90EE90';
-        btn.style.fontWeight = 'bold';
+      // restore selected state for this question if present
+      if (selectedByQuestion[currentQuestionIndex] === idx) {
+        btn.classList.add('selected');
+      }
+
+      btn.addEventListener('click', () => {
+        if (hasAnswered || phase === 'reveal') return;
+        // mark selection immediately in the UI
+        Array.from(answersDiv.querySelectorAll('button')).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedByQuestion[currentQuestionIndex] = idx;
+        submitAnswer(idx);
+      });
+
+      // mark correct/wrong in reveal phase
+      if (phase === 'reveal') {
+        if (idx === q.correctIndex) {
+          btn.classList.add('correct');
+        }
+        if (selectedByQuestion[currentQuestionIndex] != null && selectedByQuestion[currentQuestionIndex] === idx && idx !== q.correctIndex) {
+          btn.classList.add('wrong');
+        }
       }
 
       answersDiv.appendChild(btn);
