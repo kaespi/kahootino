@@ -28,26 +28,27 @@ if ($quiz['phase'] !== 'answers') {
     timed_json_response(['error' => 'Not accepting answers now'], 400);
 }
 
-$now = new DateTimeImmutable('now');
-
-$end = $quiz['question_end_time'] ? new DateTimeImmutable($quiz['question_end_time']) : null;
-$questionStart = $quiz['question_start_time'] ? new DateTimeImmutable($quiz['question_start_time']) : null;
+// use simple integer timestamps (faster than DateTime objects)
+$now = time();
+$end = $quiz['question_end_time'] ? strtotime($quiz['question_end_time']) : null;
+$questionStart = $quiz['question_start_time'] ? strtotime($quiz['question_start_time']) : null;
 
 if (!$questionStart || !$end || $now > $end) {
     timed_json_response(['error' => 'Time is up'], 400);
 }
 
-$stmt = db()->prepare("SELECT * FROM player WHERE quiz_id = ? AND cookie_token = ?");
+// fetch only id to reduce payload and parsing
+$stmt = db()->prepare("SELECT id FROM player WHERE quiz_id = ? AND cookie_token = ?");
 $stmt->execute([$quiz['id'], $token]);
-$player = $stmt->fetch();
-if (!$player) {
+$playerId = $stmt->fetchColumn();
+if (!$playerId) {
     timed_json_response(['error' => 'Player not found'], 404);
 }
 
-// prevent double answer
+// prevent double answer (fast existence check)
 $stmt = db()->prepare("SELECT id FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
-$stmt->execute([$quiz['id'], $player['id'], $questionIndex]);
-    if ($stmt->fetch()) {
+$stmt->execute([$quiz['id'], $playerId, $questionIndex]);
+if ($stmt->fetchColumn()) {
     timed_json_response(['error' => 'Already answered'], 400);
 }
 
@@ -59,7 +60,7 @@ $q = $questions['questions'][$questionIndex];
 
 $isCorrect = ($chosenOption === (int)$q['correctIndex']) ? 1 : 0;
 
-$elapsedMs   = ($now->getTimestamp() - $questionStart->getTimestamp()) * 1000;
+$elapsedMs   = ($now - $questionStart) * 1000;
 $totalMs     = ((int)$q['countdownSeconds']) * 1000;
 $remainingMs = max(0, $totalMs - $elapsedMs);
 
@@ -74,7 +75,7 @@ try {
     ");
     $stmt->execute([
         $quiz['id'],
-        $player['id'],
+        $playerId,
         $questionIndex,
         $chosenOption,
         $isCorrect,
@@ -84,7 +85,7 @@ try {
 
     if ($points > 0) {
         $stmt = db()->prepare("UPDATE player SET score = score + ? WHERE id = ?");
-        $stmt->execute([$points, $player['id']]);
+        $stmt->execute([$points, $playerId]);
     }
 
     db()->commit();

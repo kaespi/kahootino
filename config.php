@@ -20,8 +20,28 @@ function db() {
 }
 
 function load_questions() {
+    static $cached = null;
+    if ($cached !== null) return $cached;
+
+    // Try APCu cache first for faster repeated requests (optional)
+    if (function_exists('apcu_fetch')) {
+        $fromCache = apcu_fetch('kahootino_questions');
+        if ($fromCache !== false) {
+            $cached = $fromCache;
+            return $cached;
+        }
+    }
+
     $json = file_get_contents(__DIR__ . '/data/questions.json');
-    return json_decode($json, true);
+    $decoded = json_decode($json, true);
+
+    if (function_exists('apcu_store')) {
+        // cache for 5 minutes
+        @apcu_store('kahootino_questions', $decoded, 300);
+    }
+
+    $cached = $decoded;
+    return $cached;
 }
 
 function get_quiz_by_code($code) {
