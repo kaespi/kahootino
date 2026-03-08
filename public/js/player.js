@@ -226,6 +226,17 @@ function renderStandings(list) {
   const total = list.length;
   const topCount = Math.min(3, total);
 
+  // Compute competition-style ranks: equal scores share the same rank,
+  // next rank equals the (1-based) index of the next player (i+1)
+  const ranks = new Array(total);
+  for (let i = 0; i < total; i++) {
+    if (i > 0 && list[i].score === list[i - 1].score) {
+      ranks[i] = ranks[i - 1];
+    } else {
+      ranks[i] = i + 1;
+    }
+  }
+
   // Determine current player's nickname (from DOM or localStorage)
   const myNick = (playerName && playerName.textContent) || localStorage.getItem('quiz_nickname') || null;
   const myIdx = myNick ? list.findIndex(p => p.nickname === myNick) : -1;
@@ -268,7 +279,7 @@ function renderStandings(list) {
     const p = list[i];
     const li = document.createElement('li');
     if (i === myIdx) li.className = 'you-standing';
-    li.textContent = `${i + 1}. ${p.nickname} – ${p.score} Punkte`;
+    li.textContent = `${ranks[i]}. ${p.nickname} – ${p.score} Punkte`;
     standingsList.appendChild(li);
     prev = i;
   }
