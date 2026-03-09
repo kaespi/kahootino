@@ -64,12 +64,32 @@ function build_state_array($quiz, $token = null) {
     $questions = load_questions();
     $currentIndex = (int)$quiz['current_question'];
     $currentQuestion = null;
+    $showImagesToPlayers = true;
 
     if ($currentIndex >= 0 && $currentIndex < count($questions['questions'])) {
         $q = $questions['questions'][$currentIndex];
+
+        // Determine which image to show based on current indices
+        $questionImageIndex = (int)$quiz['question_image_index'];
+        $answerImageIndex = (int)$quiz['answer_image_index'];
+
+        // Get the current question image
+        $images = $q['images'] ?? [];
+        $currentImage = isset($images[$questionImageIndex]) ? $images[$questionImageIndex] : (count($images) > 0 ? $images[0] : null);
+
+        // Get the current answer image
+        $answerImages = $q['answer_images'] ?? [];
+        $currentAnswerImage = isset($answerImages[$answerImageIndex]) ? $answerImages[$answerImageIndex] : (count($answerImages) > 0 ? $answerImages[0] : null);
+
+        // Get visibility flag
+        $showImagesToPlayers = isset($q['showImagesToPlayers']) ? (bool)$q['showImagesToPlayers'] : true;
+
         $currentQuestion = [
             'text'             => $q['text'],
-            'image'            => $q['image'],
+            'image'            => $currentImage,
+            'answerImage'      => $currentAnswerImage,
+            'images'           => $images,
+            'answerImages'     => $answerImages,
             'answers'          => $q['answers'],
             'countdownSeconds' => (int)$q['countdownSeconds'],
             'correctIndex'     => (int)$q['correctIndex']
@@ -99,13 +119,16 @@ function build_state_array($quiz, $token = null) {
     }
 
     return [
-        'phase'             => $quiz['phase'],
-        'questionIndex'     => $currentIndex,
-        'question'          => $currentQuestion,
-        'serverTime'        => date('c'),
-        'questionStartTime' => $quiz['question_start_time'],
-        'questionEndTime'   => $quiz['question_end_time'],
-        'hasAnswered'       => $hasAnswered,
-        'standings'         => $standings,
+        'phase'                  => $quiz['phase'],
+        'questionIndex'          => $currentIndex,
+        'question'               => $currentQuestion,
+        'questionImageIndex'     => (int)$quiz['question_image_index'],
+        'answerImageIndex'       => (int)$quiz['answer_image_index'],
+        'showImagesToPlayers'    => $showImagesToPlayers,
+        'serverTime'             => date('c'),
+        'questionStartTime'      => $quiz['question_start_time'],
+        'questionEndTime'        => $quiz['question_end_time'],
+        'hasAnswered'            => $hasAnswered,
+        'standings'              => $standings,
     ];
 }

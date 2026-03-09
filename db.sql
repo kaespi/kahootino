@@ -9,6 +9,8 @@ CREATE TABLE quiz (
   phase ENUM('waiting','question','answers','standings','finished') NOT NULL DEFAULT 'waiting',
   question_start_time DATETIME NULL,
   question_end_time DATETIME NULL,
+  question_image_index INT DEFAULT 0,
+  answer_image_index INT DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

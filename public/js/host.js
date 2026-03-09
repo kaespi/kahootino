@@ -6,10 +6,15 @@ const countdownSection = document.getElementById('countdown-section');
 const countdownDisplay = document.getElementById('host-countdown');
 const standingsSection = document.getElementById('standings-section');
 const standingsList = document.getElementById('host-standings-list');
+const imageNavSection = document.getElementById('image-navigation-section');
+const questionImageNav = document.getElementById('question-image-nav');
+const answerImageNav = document.getElementById('answer-image-nav');
 
 let questions = [];
 let currentPhase = null;
 let currentQuestionIndex = -1;
+let currentQuestionImageIndex = 0;
+let currentAnswerImageIndex = 0;
 let countdownInterval = null;
 let countdownEndTime = null;
 
@@ -41,10 +46,6 @@ function renderQuestionsList() {
 }
 
 // Handle form submission for host actions
-document.querySelectorAll('button[data-action]').forEach(btn => {
-  btn.addEventListener('click', () => hostAction(btn.dataset.action));
-});
-
 async function hostAction(action) {
   const res = await fetch('../api/host_action.php', {
     method: 'POST',
@@ -64,10 +65,16 @@ function handleStateUpdate(data) {
   console.log('State update received:', data);
   currentPhase = data.phase;
   currentQuestionIndex = data.questionIndex !== undefined ? data.questionIndex : -1;
+  currentQuestionImageIndex = data.questionImageIndex !== undefined ? data.questionImageIndex : 0;
+  currentAnswerImageIndex = data.answerImageIndex !== undefined ? data.answerImageIndex : 0;
   console.log('Updated currentQuestionIndex to:', currentQuestionIndex);
+  console.log('Updated image indices - question:', currentQuestionImageIndex, 'answer:', currentAnswerImageIndex);
 
   // Update question highlighting
   renderQuestionsList();
+
+  // Update image navigation UI
+  updateImageNavigationUI();
 
   // Handle countdown display
   if (data.phase === 'answers' && data.questionEndTime) {
@@ -123,6 +130,71 @@ function renderStandings(list) {
     li.textContent = `${p.nickname} – ${p.score} Punkte`;
     standingsList.appendChild(li);
   });
+}
+
+// Update image navigation UI visibility and button states
+function updateImageNavigationUI() {
+  // Show/hide image navigation section
+  if (currentPhase === 'question' || currentPhase === 'answers' || currentPhase === 'reveal') {
+    imageNavSection.classList.remove('hidden');
+  } else {
+    imageNavSection.classList.add('hidden');
+    return;
+  }
+
+  // Get current question to access image arrays
+  if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.length) {
+    questionImageNav.classList.add('hidden');
+    answerImageNav.classList.add('hidden');
+    return;
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
+  const questionImages = currentQuestion.images || [];
+  const answerImages = currentQuestion.answer_images || [];
+
+  // Update question image navigation
+  if (currentPhase === 'question' && questionImages.length > 0) {
+    questionImageNav.classList.remove('hidden');
+    updateImageNavButtons('question', currentQuestionImageIndex, questionImages.length);
+  } else {
+    questionImageNav.classList.add('hidden');
+  }
+
+  // Update answer image navigation (available during answers and reveal phases)
+  if ((currentPhase === 'answers' || currentPhase === 'reveal') && answerImages.length > 0) {
+    answerImageNav.classList.remove('hidden');
+    updateImageNavButtons('answer', currentAnswerImageIndex, answerImages.length);
+  } else {
+    answerImageNav.classList.add('hidden');
+  }
+}
+
+// Update button states and counter text for image navigation
+function updateImageNavButtons(type, currentIndex, totalImages) {
+  const counter = document.getElementById(`${type}-image-counter`);
+  const prevBtn = document.getElementById(`prev-${type}-image`);
+  const nextBtn = document.getElementById(`next-${type}-image`);
+
+  // Update counter text
+  counter.textContent = `Bild ${currentIndex + 1} von ${totalImages}`;
+
+  // Update button states
+  if (currentIndex === 0) {
+    prevBtn.classList.add('disabled');
+    prevBtn.disabled = true;
+  } else {
+    prevBtn.classList.remove('disabled');
+    prevBtn.disabled = false;
+  }
+
+  if (currentIndex === totalImages - 1) {
+    nextBtn.classList.add('disabled');
+    nextBtn.disabled = true;
+  } else {
+    nextBtn.classList.remove('disabled');
+    nextBtn.disabled = false;
+  }
 }
 
 // Start real-time updates via Ably with SSE fallback
@@ -183,6 +255,11 @@ async function fetchInitialState() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+  // Attach click handlers to all action buttons
+  document.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => hostAction(btn.dataset.action));
+  });
+
   await loadQuestions();
   await fetchInitialState();
   startAbly();

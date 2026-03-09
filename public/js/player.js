@@ -120,15 +120,15 @@ function handleStateUpdate(data) {
     show(waitingScreen);
     stopCountdown();
   } else if (data.phase === 'question') {
-    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase, data.questionImageIndex, data.answerImageIndex, data.showImagesToPlayers);
     show(questionScreen);
     stopCountdown();
   } else if (data.phase === 'answers') {
     lastRenderedQuestionIndex = -1;
-    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase, data.questionImageIndex, data.answerImageIndex, data.showImagesToPlayers);
     show(questionScreen);
   } else if (data.phase === 'reveal') {
-    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase);
+    renderQuestion(data.question, data.serverTime, data.questionEndTime, data.phase, data.questionImageIndex, data.answerImageIndex, data.showImagesToPlayers);
     show(questionScreen);
     stopCountdown();
   } else if (data.phase === 'standings' || data.phase === 'finished') {
@@ -138,15 +138,25 @@ function handleStateUpdate(data) {
   }
 }
 
-function renderQuestion(q, serverTime, endTime, phase) {
+function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, answerImageIndex = 0, showImagesToPlayers = true) {
   if (!q) return;
   questionText.textContent = q.text;
-  if (q.image && !endTime) {
-    questionImage.src = '../' + q.image;
+
+  // Show question image only during 'question' phase and if showImagesToPlayers is true
+  if (q.images && q.images.length > 0 && showImagesToPlayers && !endTime) {
+    const imageToShow = q.images[questionImageIndex] || q.images[0];
+    questionImage.src = '../' + imageToShow;
     questionImage.classList.remove('hidden');
   } else {
     questionImage.classList.add('hidden');
   }
+
+  // Show answer image only during 'reveal' phase if showImagesToPlayers is true
+  let answerImageToShow = null;
+  if (q.answerImages && q.answerImages.length > 0 && showImagesToPlayers && phase === 'reveal') {
+    answerImageToShow = q.answerImages[answerImageIndex] || q.answerImages[0];
+  }
+
   answersDiv.innerHTML = '';
 
   // Only render answer buttons if endTime is set (answers should be visible)
@@ -184,6 +194,18 @@ function renderQuestion(q, serverTime, endTime, phase) {
 
       answersDiv.appendChild(btn);
     });
+
+    // Add answer image below the buttons if available
+    if (answerImageToShow) {
+      const imgContainer = document.createElement('div');
+      imgContainer.style.marginTop = '1rem';
+      const img = document.createElement('img');
+      img.src = '../' + answerImageToShow;
+      img.style.maxWidth = '100%';
+      img.style.borderRadius = '4px';
+      imgContainer.appendChild(img);
+      answersDiv.appendChild(imgContainer);
+    }
   }
 
   answerStatus.textContent = hasAnswered ? 'Antwort abgegeben.' : '';

@@ -36,12 +36,23 @@ function startAbly() {
 function renderPresentation(data) {
   if (data.question && data.phase !== 'standings' && data.phase !== 'finished') {
     qText.textContent = data.question.text;
-    if (data.question.image && data.phase !== 'standings' && data.phase !== 'finished') {
-      qImage.src = '../' + data.question.image;
+
+    // Show question image with progress indicator
+    let imageProgress = '';
+    if (data.question.images && data.question.images.length > 0 && data.showImagesToPlayers && data.phase !== 'standings' && data.phase !== 'finished') {
+      const imageIndex = data.questionImageIndex || 0;
+      const imageToShow = data.question.images[imageIndex] || data.question.images[0];
+      qImage.src = '../' + imageToShow;
       qImage.classList.remove('hidden');
+
+      // Add progress indicator if multiple images
+      if (data.question.images.length > 1) {
+        imageProgress = ` (Bild ${imageIndex + 1}/${data.question.images.length})`;
+      }
     } else {
       qImage.classList.add('hidden');
     }
+
     qAnswers.innerHTML = '';
 
     // Only render answers if questionEndTime is set (answers are revealed)
@@ -58,6 +69,36 @@ function renderPresentation(data) {
 
         qAnswers.appendChild(li);
       });
+
+      // Add answer images below the answers if available (only in reveal phase)
+      if (data.phase === 'reveal' && data.question.answerImages && data.question.answerImages.length > 0 && data.showImagesToPlayers) {
+        const answerImageIndex = data.answerImageIndex || 0;
+        const answerImageToShow = data.question.answerImages[answerImageIndex] || data.question.answerImages[0];
+
+        const imgContainer = document.createElement('div');
+        imgContainer.style.marginTop = '1rem';
+        const img = document.createElement('img');
+        img.src = '../' + answerImageToShow;
+        img.style.maxWidth = '100%';
+        img.style.borderRadius = '4px';
+
+        let answerImageProgress = '';
+        if (data.question.answerImages.length > 1) {
+          answerImageProgress = `Bild ${answerImageIndex + 1}/${data.question.answerImages.length}`;
+          imgContainer.textContent = answerImageProgress;
+          imgContainer.appendChild(img);
+        } else {
+          imgContainer.appendChild(img);
+        }
+        qAnswers.appendChild(imgContainer);
+      }
+    }
+
+    // Update title with image progress indicator
+    if (imageProgress) {
+      qTitle.textContent = `Frage ${data.questionIndex + 1}${imageProgress}`;
+    } else {
+      qTitle.textContent = `Frage ${data.questionIndex + 1}`;
     }
   } else {
     qText.textContent = '';

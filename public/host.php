@@ -26,6 +26,26 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
       <button data-action="finish_quiz">Quiz beenden</button>
     </div>
 
+    <div id="image-navigation-section" class="hidden">
+      <div id="question-image-nav" class="image-nav-group hidden">
+        <h3>Fragen-Bilder</h3>
+        <div class="image-nav-controls">
+          <button id="prev-question-image" data-action="prev_question_image" class="image-nav-btn disabled">← Vorheriges Bild</button>
+          <span id="question-image-counter" class="image-counter">Bild 1 von 1</span>
+          <button id="next-question-image" data-action="next_question_image" class="image-nav-btn disabled">Nächstes Bild →</button>
+        </div>
+      </div>
+
+      <div id="answer-image-nav" class="image-nav-group hidden">
+        <h3>Antwort-Bilder</h3>
+        <div class="image-nav-controls">
+          <button id="prev-answer-image" data-action="prev_answer_image" class="image-nav-btn disabled">← Vorheriges Bild</button>
+          <span id="answer-image-counter" class="image-counter">Bild 1 von 1</span>
+          <button id="next-answer-image" data-action="next_answer_image" class="image-nav-btn disabled">Nächstes Bild →</button>
+        </div>
+      </div>
+    </div>
+
     <div id="host-status"></div>
 
     <div id="host-content">

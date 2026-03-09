@@ -3,25 +3,35 @@
   "questions": [
     {
       "text": "Wo haben sich Anna und Tom zum ersten Mal getroffen?",
-      "image": "data/images/q1_meet.jpg",
+      "images": [
+        "data/images/q1_meet.jpg", "data/images/q1_meet_2.jpg"
+      ],
+      "showImagesToPlayers": true,
       "answers": [
         "An der Universität",
         "An einem Konzert (*)",
         "Bei der Arbeit",
         "Auf einer Wanderung"
       ],
+      "answer_images": [],
       "correctIndex": 1,
       "countdownSeconds": 20,
       "maxPoints": 1000
     },
     {
       "text": "Was ist ihr Lieblingsreiseziel?",
-      "image": "data/images/q2_holiday.jpg",
+      "images": [
+        "data/images/q2_holiday.jpg"
+      ],
+      "showImagesToPlayers": true,
       "answers": [
         "Italien (*)",
         "Island",
         "Portugal",
         "Japan"
+      ],
+      "answer_images": [
+        "data/images/q2_holiday_answer.jpg"
       ],
       "correctIndex": 0,
       "countdownSeconds": 15,

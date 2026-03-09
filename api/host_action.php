@@ -76,7 +76,9 @@ switch ($action) {
             SET phase = 'question',
                 current_question = ?,
                 question_start_time = NULL,
-                question_end_time = NULL
+                question_end_time = NULL,
+                question_image_index = 0,
+                answer_image_index = 0
             WHERE id = ?
         ");
         $stmt->execute([$nextIndex, $quiz['id']]);
@@ -86,6 +88,8 @@ switch ($action) {
         $quiz['current_question'] = $nextIndex;
         $quiz['question_start_time'] = null;
         $quiz['question_end_time'] = null;
+        $quiz['question_image_index'] = 0;
+        $quiz['answer_image_index'] = 0;
 
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
@@ -158,6 +162,102 @@ switch ($action) {
         ably_publish("quiz-$code", "state", $state);
 
         json_response(['status' => 'ok']);
+        break;
+
+    case 'prev_question_image':
+        $currentIndex = (int)$quiz['current_question'];
+        if ($currentIndex < 0) {
+            json_response(['error' => 'No question selected'], 400);
+        }
+
+        $questions = load_questions();
+        $q = $questions['questions'][$currentIndex];
+        $images = $q['images'] ?? [];
+        $currentImageIndex = (int)$quiz['question_image_index'];
+
+        if ($currentImageIndex > 0) {
+            $newIndex = $currentImageIndex - 1;
+            $stmt = db()->prepare("UPDATE quiz SET question_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['question_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['question_image_index']]);
+        break;
+
+    case 'next_question_image':
+        $currentIndex = (int)$quiz['current_question'];
+        if ($currentIndex < 0) {
+            json_response(['error' => 'No question selected'], 400);
+        }
+
+        $questions = load_questions();
+        $q = $questions['questions'][$currentIndex];
+        $images = $q['images'] ?? [];
+        $currentImageIndex = (int)$quiz['question_image_index'];
+
+        if ($currentImageIndex < count($images) - 1) {
+            $newIndex = $currentImageIndex + 1;
+            $stmt = db()->prepare("UPDATE quiz SET question_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['question_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['question_image_index']]);
+        break;
+
+    case 'prev_answer_image':
+        $currentIndex = (int)$quiz['current_question'];
+        if ($currentIndex < 0) {
+            json_response(['error' => 'No question selected'], 400);
+        }
+
+        $questions = load_questions();
+        $q = $questions['questions'][$currentIndex];
+        $answerImages = $q['answer_images'] ?? [];
+        $currentImageIndex = (int)$quiz['answer_image_index'];
+
+        if ($currentImageIndex > 0) {
+            $newIndex = $currentImageIndex - 1;
+            $stmt = db()->prepare("UPDATE quiz SET answer_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['answer_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['answer_image_index']]);
+        break;
+
+    case 'next_answer_image':
+        $currentIndex = (int)$quiz['current_question'];
+        if ($currentIndex < 0) {
+            json_response(['error' => 'No question selected'], 400);
+        }
+
+        $questions = load_questions();
+        $q = $questions['questions'][$currentIndex];
+        $answerImages = $q['answer_images'] ?? [];
+        $currentImageIndex = (int)$quiz['answer_image_index'];
+
+        if ($currentImageIndex < count($answerImages) - 1) {
+            $newIndex = $currentImageIndex + 1;
+            $stmt = db()->prepare("UPDATE quiz SET answer_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['answer_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['answer_image_index']]);
         break;
 
     default:

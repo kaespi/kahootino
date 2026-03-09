@@ -143,7 +143,78 @@ button {
   background: #0056b3;
 }
 
-#host-status {
+/* Image Navigation Controls */
+#image-navigation-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f0f7ff;
+  border-radius: 4px;
+  border: 2px solid #007bff;
+  border-left: 5px solid #007bff;
+}
+
+#image-navigation-section.hidden {
+  display: none;
+}
+
+.image-nav-group {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+  border-left: 4px solid #17a2b8;
+}
+
+.image-nav-group.hidden {
+  display: none;
+}
+
+.image-nav-group h3 {
+  margin-top: 0;
+  color: #17a2b8;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.image-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.image-nav-btn {
+  padding: 0.5rem 1rem;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  font-weight: 500;
+}
+
+.image-nav-btn:hover:not(.disabled) {
+  background: #138496;
+}
+
+.image-nav-btn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.image-counter {
+  font-weight: bold;
+  color: #17a2b8;
+  min-width: 120px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+
   padding: 0.75rem 1rem;
   margin: 1rem 0;
   background: #e7f3ff;
