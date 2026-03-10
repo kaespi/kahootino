@@ -385,3 +385,14 @@ section h2 {
   /* prevent the image from causing horizontal overflow */
   max-width: calc(100vw - 2rem);
 }
+
+/* Answer image shown during reveal phase: behave like question image and center */
+.player .answer-image img {
+  display: block;
+  width: auto;
+  max-width: calc(100vw - 2rem);
+  height: auto;
+  margin: 0.5rem auto;
+  box-sizing: border-box;
+  border-radius: 4px;
+}

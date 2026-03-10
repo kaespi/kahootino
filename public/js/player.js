@@ -143,12 +143,16 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
   questionText.textContent = q.text;
 
   // Show question image only during 'question' phase and if showImagesToPlayers is true
-  if (q.images && q.images.length > 0 && showImagesToPlayers && !endTime) {
+  if (phase === 'question' && q.images && q.images.length > 0 && showImagesToPlayers) {
     const imageToShow = q.images[questionImageIndex] || q.images[0];
     questionImage.src = '../' + imageToShow;
     questionImage.classList.remove('hidden');
+    // ensure visible even if inline styles existed
+    questionImage.style.display = '';
   } else {
+    // explicitly hide the question image to avoid leftover visibility
     questionImage.classList.add('hidden');
+    questionImage.style.display = 'none';
   }
 
   // Show answer image only during 'reveal' phase if showImagesToPlayers is true
@@ -161,6 +165,18 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
 
   // Only render answer buttons if endTime is set (answers should be visible)
   if (endTime) {
+    // If we're in the reveal phase and an answer image exists, place it above the answers
+    if (answerImageToShow && phase === 'reveal') {
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'answer-image';
+      imgContainer.style.marginBottom = '0.75rem';
+      const img = document.createElement('img');
+      img.src = '../' + answerImageToShow;
+      img.alt = '';
+      imgContainer.appendChild(img);
+      answersDiv.appendChild(imgContainer);
+    }
+
     q.answers.forEach((ans, idx) => {
       const btn = document.createElement('button');
       btn.textContent = ans;
@@ -194,18 +210,6 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
 
       answersDiv.appendChild(btn);
     });
-
-    // Add answer image below the buttons if available
-    if (answerImageToShow) {
-      const imgContainer = document.createElement('div');
-      imgContainer.style.marginTop = '1rem';
-      const img = document.createElement('img');
-      img.src = '../' + answerImageToShow;
-      img.style.maxWidth = '100%';
-      img.style.borderRadius = '4px';
-      imgContainer.appendChild(img);
-      answersDiv.appendChild(imgContainer);
-    }
   }
 
   answerStatus.textContent = hasAnswered ? 'Antwort abgegeben.' : '';
