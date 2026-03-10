@@ -7,7 +7,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 <head>
   <meta charset="UTF-8">
   <title>Kahootino Quiz - Player</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
 </head>

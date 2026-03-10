@@ -371,3 +371,17 @@ section h2 {
     padding: 1rem;
   }
 }
+
+/* Player: scale and center question images responsively
+   - shrink images that are wider than the viewport to avoid horizontal scrolling
+   - keep smaller images at their natural size and center them
+   - ensure image keeps aspect ratio when device rotates */
+.player #question-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5rem auto; /* center smaller images and add small vertical gap */
+  box-sizing: border-box;
+  /* prevent the image from causing horizontal overflow */
+  max-width: calc(100vw - 2rem);
+}
