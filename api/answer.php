@@ -28,12 +28,12 @@ if ($quiz['phase'] !== 'answers') {
     timed_json_response(['error' => 'Not accepting answers now'], 400);
 }
 
-// use simple integer timestamps (faster than DateTime objects)
-$now = time();
+// use high-resolution current time so scoring isn't quantized to seconds
+$now = microtime(true);
 $end = $quiz['question_end_time'] ? strtotime($quiz['question_end_time']) : null;
 $questionStart = $quiz['question_start_time'] ? strtotime($quiz['question_start_time']) : null;
 
-if (!$questionStart || !$end || $now > $end) {
+if ($questionStart === null || $end === null || $now > $end) {
     timed_json_response(['error' => 'Time is up'], 400);
 }
 
@@ -60,7 +60,7 @@ $q = $questions['questions'][$questionIndex];
 
 $isCorrect = ($chosenOption === (int)$q['correctIndex']) ? 1 : 0;
 
-$elapsedMs   = ($now - $questionStart) * 1000;
+$elapsedMs   = max(0, ($now - $questionStart) * 1000);
 $totalMs     = ((int)$q['countdownSeconds']) * 1000;
 $remainingMs = max(0, $totalMs - $elapsedMs);
 
@@ -79,7 +79,7 @@ try {
         $questionIndex,
         $chosenOption,
         $isCorrect,
-        $elapsedMs,
+        (int)round($elapsedMs),
         $points
     ]);
 
