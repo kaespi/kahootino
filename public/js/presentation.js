@@ -62,7 +62,7 @@ function renderPresentation(data) {
     const hasQuestionImages = data.question.images && data.question.images.length > 0;
     const hasAnswerImages = data.question.answerImages && data.question.answerImages.length > 0;
 
-    if (hasAnswerImages && data.showImagesToPlayers && (data.phase === 'answers' || data.phase === 'reveal')) {
+    if (hasAnswerImages && data.showImagesToPlayers && data.phase === 'reveal') {
       const ai = data.answerImageIndex || 0;
       const answerImageToShow = data.question.answerImages[ai] || data.question.answerImages[0];
       qImage.src = '../' + answerImageToShow;
