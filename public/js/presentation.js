@@ -59,7 +59,6 @@ function renderPresentation(data) {
     // Decide which image to show in the top slot. If answer images exist
     // and we're in the answer/reveal phase, prefer an answer image so it
     // appears above the answers. Otherwise show the question image.
-    let imageProgress = '';
     const hasQuestionImages = data.question.images && data.question.images.length > 0;
     const hasAnswerImages = data.question.answerImages && data.question.answerImages.length > 0;
 
@@ -68,17 +67,11 @@ function renderPresentation(data) {
       const answerImageToShow = data.question.answerImages[ai] || data.question.answerImages[0];
       qImage.src = '../' + answerImageToShow;
       qImage.classList.remove('hidden');
-      if (data.question.answerImages.length > 1) {
-        imageProgress = ` (Bild ${ai + 1}/${data.question.answerImages.length})`;
-      }
     } else if (hasQuestionImages && data.showImagesToPlayers) {
       const qi = data.questionImageIndex || 0;
       const questionImageToShow = data.question.images[qi] || data.question.images[0];
       qImage.src = '../' + questionImageToShow;
       qImage.classList.remove('hidden');
-      if (data.question.images.length > 1) {
-        imageProgress = ` (Bild ${qi + 1}/${data.question.images.length})`;
-      }
     } else {
       qImage.classList.add('hidden');
     }
