@@ -8,6 +8,7 @@ const qAnswers = document.getElementById('p-answers');
 const sTitle = document.getElementById('p-standings-title');
 const sList = document.getElementById('p-standings');
 const participantsOverlay = document.getElementById('participants-overlay');
+const pImageContainer = document.querySelector('.p-image-container');
 
 // map of nickname -> { left, top, rot, scale }
 const participantsMap = {};
@@ -104,6 +105,31 @@ function renderPresentation(data) {
 
       // Note: answer images are shown in the top `qImage` slot when available
       // during the answers/reveal phases. No need to append them again below.
+    }
+
+    // Adjust image sizing so answers fit vertically in the viewport
+    try {
+      // small delay to ensure DOM rendered sizes are available
+      requestAnimationFrame(() => {
+        if (!pImageContainer) return;
+        if (data.phase === 'answers' || data.phase === 'reveal') {
+          const headerHeight = (qTitle.offsetHeight || 0) + (qText.offsetHeight || 0) + 24; // padding
+          const answersHeight = qAnswers.scrollHeight || 0;
+          const standingsHeight = (sTitle.offsetHeight || 0) + (sList.scrollHeight || 0);
+          const reserved = headerHeight + answersHeight + standingsHeight + 48; // extra padding
+          const maxImagePx = Math.max(0, window.innerHeight - reserved);
+          // leave at least 20vh for image if calculation fails
+          const minPx = window.innerHeight * 0.2;
+          pImageContainer.style.maxHeight = Math.max(minPx, maxImagePx) + 'px';
+          // ensure the image itself doesn't exceed the container
+          qImage.style.maxHeight = '100%';
+        } else {
+          pImageContainer.style.maxHeight = '';
+          qImage.style.maxHeight = '';
+        }
+      });
+    } catch (err) {
+      console.error('Failed to adjust presentation image sizing', err);
     }
 
     // Update title with image progress indicator

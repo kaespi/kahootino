@@ -11,6 +11,63 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    /* Presentation layout: full viewport column, image area grows */
+    #presentation-app {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      box-sizing: border-box;
+      padding: 1rem 1.25rem;
+      overflow: hidden;
+    }
+
+    #p-title {
+      margin: 0 0 0.25rem 0;
+      padding: 0;
+      font-size: 1.6rem;
+    }
+
+    #p-question {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+    }
+
+    .p-image-container {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    #p-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 6px;
+    }
+
+    /* Answers and standings reserved area: allow answers to size naturally
+       so we can measure their full height and shrink the image accordingly */
+    #p-answers {
+      margin: 0;
+      padding-left: 1.25rem;
+      max-height: none;
+      overflow: visible;
+    }
+
+    #p-standings, #p-standings-title {
+      margin: 0;
+      padding: 0;
+    }
+
     #participants-overlay {
       position: absolute;
       top: 0;
@@ -38,10 +95,12 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
   </style>
 </head>
 <body class="presentation">
-  <div id="presentation-app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>" style="position:relative; min-height:100vh;">
+  <div id="presentation-app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>" style="position:relative; height:100vh;">
     <h1 id="p-title">Kahootino Quiz</h1>
     <h2 id="p-question"></h2>
-    <img id="p-image" class="hidden" alt="">
+    <div class="p-image-container">
+      <img id="p-image" class="hidden" alt="">
+    </div>
     <ul id="p-answers"></ul>
     <h2 id="p-standings-title" class="hidden">Rangliste</h2>
     <ol id="p-standings"></ol>
