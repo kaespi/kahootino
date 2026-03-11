@@ -114,11 +114,7 @@ function renderPresentation(data) {
     }
 
     // Update title with image progress indicator
-    if (imageProgress) {
-      qTitle.textContent = `Frage ${data.questionIndex + 1}${imageProgress}`;
-    } else {
-      qTitle.textContent = `Frage ${data.questionIndex + 1}`;
-    }
+    qTitle.textContent = `Frage ${data.questionIndex + 1}`;
   } else {
     qText.textContent = '';
     qAnswers.innerHTML = '';
