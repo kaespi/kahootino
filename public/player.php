@@ -6,7 +6,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Kahootino Quiz - Player</title>
+  <title>Kahootino Quiz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
@@ -15,19 +15,19 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
   <div id="app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>">
     <div id="join-screen">
       <h1>Kahootino Quiz</h1>
-      <p>Your nickname:</p>
+      <p>Dein Nickname:</p>
       <input type="text" id="nickname" maxlength="64" placeholder="Nickname" autofocus autocomplete="off">
-      <button id="join-btn">Join</button>
+      <button id="join-btn">Beitreten</button>
       <div id="join-error" class="error"></div>
     </div>
 
     <div id="waiting-screen" class="hidden">
-      <h2>Wait for the start of the quiz…</h2>
+      <h2>Warte auf den Start des Quiz...</h2>
       <p id="player-name"></p>
     </div>
 
     <div id="rejoined-screen" class="hidden">
-      <h2>Wait for the quiz to continue…</h2>
+      <h2>Warte bis das Quiz fortgesetzt wird...</h2>
       <p id="player-name"></p>
     </div>
 
@@ -43,7 +43,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     </div>
 
     <div id="standings-screen" class="hidden">
-      <h2>Standings</h2>
+      <h2>Rangliste</h2>
       <ol id="standings-list"></ol>
     </div>
   </div>

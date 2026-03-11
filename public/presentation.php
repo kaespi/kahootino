@@ -43,7 +43,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     <h2 id="p-question"></h2>
     <img id="p-image" class="hidden" alt="">
     <ul id="p-answers"></ul>
-    <h2 id="p-standings-title" class="hidden">Standings</h2>
+    <h2 id="p-standings-title" class="hidden">Rangliste</h2>
     <ol id="p-standings"></ol>
   </div>
 
