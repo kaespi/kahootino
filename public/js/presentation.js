@@ -150,6 +150,15 @@ function renderPresentation(data) {
       li.textContent = `${idx + 1}. ${p.nickname} – ${p.score} Punkte`;
       sList.appendChild(li);
     });
+    // Ensure the top image is hidden when showing standings
+    try {
+      qImage.classList.add('hidden');
+      qImage.src = '';
+      if (pImageContainer) pImageContainer.style.maxHeight = '';
+      qImage.style.maxHeight = '';
+    } catch (err) {
+      // ignore
+    }
   } else {
     sTitle.classList.add('hidden');
     sList.innerHTML = '';

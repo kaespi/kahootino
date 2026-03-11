@@ -98,12 +98,12 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
   <div id="presentation-app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>" style="position:relative; height:100vh;">
     <h1 id="p-title">Kahootino Quiz</h1>
     <h2 id="p-question"></h2>
+    <h2 id="p-standings-title" class="hidden">Rangliste</h2>
+    <ol id="p-standings"></ol>
     <div class="p-image-container">
       <img id="p-image" class="hidden" alt="">
     </div>
     <ul id="p-answers"></ul>
-    <h2 id="p-standings-title" class="hidden">Rangliste</h2>
-    <ol id="p-standings"></ol>
   </div>
 
   <div id="participants-overlay"></div>
