@@ -16,7 +16,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     <div id="join-screen">
       <h1>Kahootino Quiz</h1>
       <p>Your nickname:</p>
-      <input type="text" id="nickname" maxlength="64">
+      <input type="text" id="nickname" maxlength="64" placeholder="Nickname" autofocus autocomplete="off">
       <button id="join-btn">Join</button>
       <div id="join-error" class="error"></div>
     </div>

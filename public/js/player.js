@@ -55,14 +55,30 @@ async function joinQuiz() {
     return;
   }
   joinError.textContent = '';
-  const res = await fetch('../api/join.php', {
+  // Disable button to prevent double submits and show progress
+  const prevBtnText = joinBtn.textContent;
+  joinBtn.disabled = true;
+  joinBtn.textContent = 'Beitreten...';
+
+  let res;
+  try {
+    res = await fetch('../api/join.php', {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
     body: new URLSearchParams({code, nickname})
-  });
+    });
+  } catch (err) {
+    joinError.textContent = 'Beitritt fehlgeschlagen';
+    joinBtn.disabled = false;
+    joinBtn.textContent = prevBtnText;
+    return;
+  }
+
   const data = await res.json();
   if (!res.ok || data.error) {
     joinError.textContent = data.error || 'Beitritt fehlgeschlagen';
+    joinBtn.disabled = false;
+    joinBtn.textContent = prevBtnText;
     return;
   }
   token = data.token;
@@ -364,6 +380,13 @@ function updateCountdownDisplay(sec) {
 }
 
 joinBtn.addEventListener('click', joinQuiz);
+// Submit when pressing Enter in the nickname field
+nicknameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    joinQuiz();
+  }
+});
 
 (async function init() {
   // Check localStorage first for persisted session
