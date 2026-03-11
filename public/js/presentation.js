@@ -56,17 +56,28 @@ function renderPresentation(data) {
   if (data.question && data.phase !== 'standings' && data.phase !== 'finished') {
     qText.textContent = data.question.text;
 
-    // Show question image with progress indicator
+    // Decide which image to show in the top slot. If answer images exist
+    // and we're in the answer/reveal phase, prefer an answer image so it
+    // appears above the answers. Otherwise show the question image.
     let imageProgress = '';
-    if (data.question.images && data.question.images.length > 0 && data.showImagesToPlayers && data.phase !== 'standings' && data.phase !== 'finished') {
-      const imageIndex = data.questionImageIndex || 0;
-      const imageToShow = data.question.images[imageIndex] || data.question.images[0];
-      qImage.src = '../' + imageToShow;
-      qImage.classList.remove('hidden');
+    const hasQuestionImages = data.question.images && data.question.images.length > 0;
+    const hasAnswerImages = data.question.answerImages && data.question.answerImages.length > 0;
 
-      // Add progress indicator if multiple images
+    if (hasAnswerImages && data.showImagesToPlayers && (data.phase === 'answers' || data.phase === 'reveal')) {
+      const ai = data.answerImageIndex || 0;
+      const answerImageToShow = data.question.answerImages[ai] || data.question.answerImages[0];
+      qImage.src = '../' + answerImageToShow;
+      qImage.classList.remove('hidden');
+      if (data.question.answerImages.length > 1) {
+        imageProgress = ` (Bild ${ai + 1}/${data.question.answerImages.length})`;
+      }
+    } else if (hasQuestionImages && data.showImagesToPlayers) {
+      const qi = data.questionImageIndex || 0;
+      const questionImageToShow = data.question.images[qi] || data.question.images[0];
+      qImage.src = '../' + questionImageToShow;
+      qImage.classList.remove('hidden');
       if (data.question.images.length > 1) {
-        imageProgress = ` (Bild ${imageIndex + 1}/${data.question.images.length})`;
+        imageProgress = ` (Bild ${qi + 1}/${data.question.images.length})`;
       }
     } else {
       qImage.classList.add('hidden');
@@ -89,28 +100,8 @@ function renderPresentation(data) {
         qAnswers.appendChild(li);
       });
 
-      // Add answer images below the answers if available (only in reveal phase)
-      if (data.phase === 'reveal' && data.question.answerImages && data.question.answerImages.length > 0 && data.showImagesToPlayers) {
-        const answerImageIndex = data.answerImageIndex || 0;
-        const answerImageToShow = data.question.answerImages[answerImageIndex] || data.question.answerImages[0];
-
-        const imgContainer = document.createElement('div');
-        imgContainer.style.marginTop = '1rem';
-        const img = document.createElement('img');
-        img.src = '../' + answerImageToShow;
-        img.style.maxWidth = '100%';
-        img.style.borderRadius = '4px';
-
-        let answerImageProgress = '';
-        if (data.question.answerImages.length > 1) {
-          answerImageProgress = `Bild ${answerImageIndex + 1}/${data.question.answerImages.length}`;
-          imgContainer.textContent = answerImageProgress;
-          imgContainer.appendChild(img);
-        } else {
-          imgContainer.appendChild(img);
-        }
-        qAnswers.appendChild(imgContainer);
-      }
+      // Note: answer images are shown in the top `qImage` slot when available
+      // during the answers/reveal phases. No need to append them again below.
     }
 
     // Update title with image progress indicator
@@ -202,7 +193,7 @@ function showParticipantsOverlay(show) {
   participantsOverlay.style.display = show ? 'block' : 'none';
   if (show) {
     // ensure participants are rendered
-    if (participants.length === 0) {
+    if (participantsOrder.length === 0) {
       fetchPlayers();
     } else {
       renderParticipants();
