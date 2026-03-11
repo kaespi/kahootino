@@ -7,6 +7,11 @@ const qImage = document.getElementById('p-image');
 const qAnswers = document.getElementById('p-answers');
 const sTitle = document.getElementById('p-standings-title');
 const sList = document.getElementById('p-standings');
+const participantsOverlay = document.getElementById('participants-overlay');
+
+// map of nickname -> { left, top, rot, scale }
+const participantsMap = {};
+const participantsOrder = []; // preserve insertion order
 
 function startSSEP() {
   const url = '../api/state_sse.php?code=' + encodeURIComponent(codeP);
@@ -31,9 +36,23 @@ function startAbly() {
     const data = msg.data;
     renderPresentation(data);
   });
+  // subscribe to join notifications
+  channel.subscribe('join', (msg) => {
+    try {
+      handleJoin(msg.data);
+    } catch (err) {
+      console.error('Failed to handle presentation join message', err);
+    }
+  });
 }
 
 function renderPresentation(data) {
+  // Show participants only during waiting phase
+  if (data.phase === 'waiting') {
+    showParticipantsOverlay(true);
+  } else {
+    showParticipantsOverlay(false);
+  }
   if (data.question && data.phase !== 'standings' && data.phase !== 'finished') {
     qText.textContent = data.question.text;
 
@@ -123,3 +142,77 @@ function renderPresentation(data) {
 }
 
 startAbly();
+
+
+// Fetch current players on load and render them (preserve positions)
+async function fetchPlayers() {
+  try {
+    const res = await fetch('../api/players.php?code=' + encodeURIComponent(codeP));
+    const data = await res.json();
+    if (!res.ok || data.error) return;
+    const list = (data.players || []).map(p => p.nickname);
+    list.forEach(nick => ensureParticipant(nick));
+    renderParticipants();
+  } catch (err) {
+    console.error('Error fetching players for presentation:', err);
+  }
+}
+
+function handleJoin(data) {
+  if (!data || !data.nickname) return;
+  ensureParticipant(data.nickname);
+  renderParticipants();
+}
+
+function ensureParticipant(nick) {
+  if (!nick) return;
+  if (participantsMap[nick]) return;
+  // Assign a stable random position and style properties on first sight
+  const left = Math.random() * 90 + 5; // 5% - 95%
+  const top = Math.random() * 80 + 10; // 10% - 90% (avoid very top)
+  const rot = (Math.random() * 20) - 10;
+  const scale = 0.95 + Math.random() * 0.25;
+  participantsMap[nick] = { left, top, rot, scale };
+  participantsOrder.push(nick);
+  // limit total stored participants to avoid memory growth
+  const maxStored = 1000;
+  if (participantsOrder.length > maxStored) {
+    const removed = participantsOrder.shift();
+    delete participantsMap[removed];
+  }
+}
+
+function renderParticipants() {
+  if (!participantsOverlay) return;
+  const max = 200;
+  participantsOverlay.innerHTML = '';
+  // render in insertion order, but cap to last `max` entries
+  const toRender = participantsOrder.slice(-max);
+  toRender.forEach(nick => {
+    const props = participantsMap[nick];
+    if (!props) return;
+    const el = document.createElement('div');
+    el.className = 'participant-badge';
+    el.textContent = nick;
+    el.style.left = props.left + '%';
+    el.style.top = props.top + '%';
+    el.style.transform = `translate(-50%, -50%) rotate(${props.rot}deg) scale(${props.scale})`;
+    participantsOverlay.appendChild(el);
+  });
+}
+
+function showParticipantsOverlay(show) {
+  if (!participantsOverlay) return;
+  participantsOverlay.style.display = show ? 'block' : 'none';
+  if (show) {
+    // ensure participants are rendered
+    if (participants.length === 0) {
+      fetchPlayers();
+    } else {
+      renderParticipants();
+    }
+  }
+}
+
+// Initialize participants on load
+fetchPlayers();
