@@ -9,6 +9,9 @@ const standingsList = document.getElementById('host-standings-list');
 const imageNavSection = document.getElementById('image-navigation-section');
 const questionImageNav = document.getElementById('question-image-nav');
 const answerImageNav = document.getElementById('answer-image-nav');
+const participantsSection = document.getElementById('participants-section');
+const participantsList = document.getElementById('participants-list');
+const participantsCount = document.getElementById('participants-count');
 
 let questions = [];
 let currentPhase = null;
@@ -17,6 +20,7 @@ let currentQuestionImageIndex = 0;
 let currentAnswerImageIndex = 0;
 let countdownInterval = null;
 let countdownEndTime = null;
+let participants = [];
 
 // Fetch questions on load
 async function loadQuestions() {
@@ -214,6 +218,14 @@ function startAbly() {
       const data = msg.data;
       handleStateUpdate(data);
     });
+      // subscribe to join notifications
+      channel.subscribe('join', (msg) => {
+        try {
+          handleJoin(msg.data);
+        } catch (err) {
+          console.error('Failed to handle join message', err);
+        }
+      });
   } catch (err) {
     console.error('Ably failed, falling back to SSE:', err);
     startSSE();
@@ -248,9 +260,50 @@ async function fetchInitialState() {
       return;
     }
     handleStateUpdate(data);
+    // Also fetch current participants list
+    try {
+      await fetchPlayers();
+    } catch (err) {
+      console.error('Failed to fetch players:', err);
+    }
   } catch (err) {
     console.error('Error fetching initial state:', err);
   }
+}
+
+async function fetchPlayers() {
+  try {
+    const res = await fetch('../api/players.php?code=' + encodeURIComponent(code));
+    const data = await res.json();
+    if (!res.ok || data.error) return;
+    participants = (data.players || []).map(p => p.nickname);
+    renderParticipants();
+  } catch (err) {
+    console.error('Error fetching players:', err);
+  }
+}
+
+function handleJoin(data) {
+  if (!data || !data.nickname) return;
+  addParticipant(data.nickname);
+}
+
+function addParticipant(nick) {
+  if (!nick) return;
+  if (participants.indexOf(nick) !== -1) return;
+  participants.push(nick);
+  renderParticipants();
+}
+
+function renderParticipants() {
+  if (!participantsList || !participantsCount) return;
+  participantsList.innerHTML = '';
+  participants.forEach(nick => {
+    const li = document.createElement('li');
+    li.textContent = nick;
+    participantsList.appendChild(li);
+  });
+  participantsCount.textContent = participants.length;
 }
 
 // Initialize

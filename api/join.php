@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/ably.php';
 
 $code     = $_POST['code'] ?? null;
 $nickname = trim($_POST['nickname'] ?? '');
@@ -18,6 +19,12 @@ $token = bin2hex(random_bytes(16));
 try {
     $stmt = db()->prepare("INSERT INTO player (quiz_id, nickname, cookie_token) VALUES (?, ?, ?)");
     $stmt->execute([$quiz['id'], $nickname, $token]);
+    // Notify hosts/presentations via Ably that a new player joined
+    try {
+        ably_publish("quiz-$code", "join", ['nickname' => $nickname, 'joinedAt' => date('c')]);
+    } catch (Exception $e) {
+        // non-fatal: don't break the join on notify failures
+    }
 } catch (PDOException $e) {
     json_response(['error' => 'Nickname already taken'], 400);
 }
