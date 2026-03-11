@@ -90,6 +90,15 @@ function renderPresentation(data) {
             li.style.fontWeight = 'bold';
         }
 
+        if (data.phase === 'reveal') {
+                if (data.question.correctIndex === idx) {
+                li.style.color = 'yellow';
+                li.style.fontWeight = 'bold';
+            } else {
+                li.classList.add('hidden');
+            }
+        }
+
         qAnswers.appendChild(li);
       });
 
