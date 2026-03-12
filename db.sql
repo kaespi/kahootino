@@ -6,7 +6,7 @@ CREATE TABLE quiz (
   code VARCHAR(16) UNIQUE NOT NULL,
   title VARCHAR(255) NOT NULL,
   current_question INT DEFAULT -1,
-  phase ENUM('waiting','question','answers','standings','finished') NOT NULL DEFAULT 'waiting',
+  phase ENUM('waiting','question','answers','standings','finished','reveal') NOT NULL DEFAULT 'waiting',
   question_start_time DATETIME NULL,
   question_end_time DATETIME NULL,
   question_image_index INT DEFAULT 0,
@@ -40,3 +40,4 @@ CREATE TABLE answer (
   FOREIGN KEY (quiz_id) REFERENCES quiz(id),
   FOREIGN KEY (player_id) REFERENCES player(id)
 );
+
