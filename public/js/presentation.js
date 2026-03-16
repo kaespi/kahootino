@@ -63,12 +63,12 @@ function renderPresentation(data) {
     const hasQuestionImages = data.question.images && data.question.images.length > 0;
     const hasAnswerImages = data.question.answerImages && data.question.answerImages.length > 0;
 
-    if (hasAnswerImages && data.showImagesToPlayers && data.phase === 'reveal') {
+    if (hasAnswerImages && data.phase === 'reveal') {
       const ai = data.answerImageIndex || 0;
       const answerImageToShow = data.question.answerImages[ai] || data.question.answerImages[0];
       qImage.src = '../' + answerImageToShow;
       qImage.classList.remove('hidden');
-    } else if (hasQuestionImages && data.showImagesToPlayers) {
+    } else if (hasQuestionImages) {
       const qi = data.questionImageIndex || 0;
       const questionImageToShow = data.question.images[qi] || data.question.images[0];
       qImage.src = '../' + questionImageToShow;
@@ -141,6 +141,7 @@ function renderPresentation(data) {
   }
 
   if (data.phase === 'standings' || data.phase === 'finished') {
+    qTitle.textContent = '';
     sTitle.classList.remove('hidden');
     sList.innerHTML = '';
     // Only show top 10 on the presentation screen
