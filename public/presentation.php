@@ -23,6 +23,13 @@ $allImages = array_values(array_unique($allImages));
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
+  <!-- Favicon and PWA links -->
+  <link rel="icon" href="icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="icons/site.webmanifest">
+  <meta name="theme-color" content="#ffffff">
   <style>
     html, body {
       height: 100%;
