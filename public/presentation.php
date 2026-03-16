@@ -1,6 +1,19 @@
 <?php
 require_once __DIR__ . '/../config.php';
 $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
+
+// Collect all image paths for client-side preloading
+$questions = load_questions();
+$allImages = [];
+foreach ($questions['questions'] as $q) {
+    foreach ($q['images'] ?? [] as $img) {
+        $allImages[] = '../' . $img;
+    }
+    foreach ($q['answer_images'] ?? [] as $img) {
+        $allImages[] = '../' . $img;
+    }
+}
+$allImages = array_values(array_unique($allImages));
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -108,6 +121,9 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 
   <div id="participants-overlay"></div>
 
+  <script>
+    window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
+  </script>
   <script src="js/presentation.js"></script>
 </body>
 </html>
