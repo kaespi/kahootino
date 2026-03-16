@@ -1,6 +1,6 @@
 # kahootino
 
-Interactive Quiz for Multiple Players
+Interactive quiz for multiple players.
 
 ## Installation
 
