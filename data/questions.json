@@ -1,5 +1,5 @@
 {
-  "title": "Anna & Tom Wedding Quiz",
+  "$schema": "questions.schema.json",
   "questions": [
     {
       "text": "Wo haben sich Anna und Tom zum ersten Mal getroffen?",

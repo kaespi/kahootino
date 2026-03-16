@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Kahootino Questions File",
+  "type": "object",
+  "description": "Schema for the quiz data file. Represents a quiz with metadata and an ordered array of questions.",
+  "required": ["title", "questions"],
+  "additionalProperties": false,
+  "properties": {
+      "$schema": {
+        "type": "string",
+        "description": "Optional in-file $schema pointer so editors can reference the schema."
+      },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title of the quiz (displayed to hosts/presentation).",
+      "examples": ["Anna & Tom Wedding Quiz"]
+    },
+    "questions": {
+      "type": "array",
+      "description": "Ordered list of questions in the quiz. The host advances through these sequentially.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "answers", "correctIndex", "countdownSeconds", "maxPoints"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Main question text shown to players and presentation.",
+            "examples": ["Where have Anna and Tom met?"]
+          },
+          "images": {
+            "type": "array",
+            "description": "Optional array of image file paths or URLs associated with the question (shown in presentation mode).",
+            "items": { "type": "string" }
+          },
+          "showImagesToPlayers": {
+            "type": "boolean",
+            "description": "Whether the images should also be visible to players on their devices.",
+            "default": false
+          },
+          "answers": {
+            "type": "array",
+            "description": "Array of possible answer strings presented to players. Order matters for indexing.",
+            "minItems": 2,
+            "items": { "type": "string" }
+          },
+          "answer_images": {
+            "type": "array",
+            "description": "Optional array of image file paths or URLs used to illustrate answers (one or more items, shown in presentation mode).",
+            "items": { "type": "string" }
+          },
+          "correctIndex": {
+            "type": "integer",
+            "description": "Zero-based index into the answers array indicating the correct option. MUST satisfy 0 <= correctIndex < answers.length.",
+            "minimum": 0
+          },
+          "countdownSeconds": {
+            "type": "integer",
+            "description": "Number of seconds players have to submit an answer after answers are shown (countdown timer).",
+            "minimum": 1
+          },
+          "maxPoints": {
+            "type": "integer",
+            "description": "Maximum points available for a fastest/correct answer for this question (scoring may degrade with time).",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}
