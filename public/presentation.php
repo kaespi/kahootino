@@ -27,6 +27,7 @@ $allImages = array_values(array_unique($allImages));
     html, body {
       height: 100%;
       margin: 0;
+      overflow: hidden; /* force-hide page scrollbars for presentation mode */
     }
     /* Presentation layout: full viewport column, image area grows */
     #presentation-app {
