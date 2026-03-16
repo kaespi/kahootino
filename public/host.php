@@ -25,12 +25,10 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     <p>Player-URL / QR: <code><?php echo htmlspecialchars("$URL_TO_QUIZ/public/player.php?code=$code"); ?></code></p>
 
     <div id="host-controls">
-      <button data-action="start_quiz">Quiz starten (reset)</button>
       <button data-action="show_question">Nächste Frage anzeigen</button>
       <button data-action="show_answers">Antworten anzeigen</button>
       <button data-action="reveal">Richtige Antwort zeigen</button>
       <button data-action="show_standings">Rangliste anzeigen</button>
-      <button data-action="finish_quiz">Quiz beenden</button>
     </div>
 
     <div id="participants-section">
@@ -76,6 +74,11 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
         <ol id="host-standings-list"></ol>
       </section>
     </div>
+  </div>
+
+  <div id="host-controls">
+    <button data-action="start_quiz">Quiz starten (reset)</button>
+    <button data-action="finish_quiz">Quiz beenden</button>
   </div>
 
   <script src="js/host.js"></script>
