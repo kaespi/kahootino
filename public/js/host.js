@@ -139,7 +139,7 @@ function renderStandings(list) {
 // Update image navigation UI visibility and button states
 function updateImageNavigationUI() {
   // Show/hide image navigation section
-  if (currentPhase === 'question' || currentPhase === 'answers' || currentPhase === 'reveal') {
+  if (currentPhase === 'question' || currentPhase === 'reveal') {
     imageNavSection.classList.remove('hidden');
   } else {
     imageNavSection.classList.add('hidden');
@@ -165,8 +165,8 @@ function updateImageNavigationUI() {
     questionImageNav.classList.add('hidden');
   }
 
-  // Update answer image navigation (available during answers and reveal phases)
-  if ((currentPhase === 'answers' || currentPhase === 'reveal') && answerImages.length > 0) {
+  // Update answer image navigation (available during reveal phase)
+  if (currentPhase === 'reveal' && answerImages.length > 0) {
     answerImageNav.classList.remove('hidden');
     updateImageNavButtons('answer', currentAnswerImageIndex, answerImages.length);
   } else {
