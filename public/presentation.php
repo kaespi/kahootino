@@ -33,6 +33,9 @@ $allImages = array_values(array_unique($allImages));
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="icons/site.webmanifest">
   <meta name="theme-color" content="#ffffff">
+<?php foreach ($allImages as $imgPath): ?>
+  <link rel="preload" as="image" href="<?php echo htmlspecialchars($imgPath); ?>">
+<?php endforeach; ?>
   <style>
     html, body {
       height: 100%;

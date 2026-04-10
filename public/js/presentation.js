@@ -208,14 +208,12 @@ function renderPresentation(data) {
 
 startAbly();
 
-// Preload all quiz images so they display instantly when needed
-(function preloadImages() {
-  const paths = window.KAHOOTINO_IMAGES || [];
-  paths.forEach(src => {
-    const img = new Image();
-    img.src = src;
-  });
-})();
+// Keep Image objects alive in a persistent array so the browser retains them in memory cache
+const _preloadedImages = (window.KAHOOTINO_IMAGES || []).map(src => {
+  const img = new Image();
+  img.src = src;
+  return img;
+});
 
 // Fetch current players on load and render them (preserve positions)
 async function fetchPlayers() {
