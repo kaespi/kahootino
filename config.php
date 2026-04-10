@@ -65,6 +65,18 @@ function build_state_array($quiz, $token = null) {
     $currentIndex = (int)$quiz['current_question'];
     $currentQuestion = null;
     $showImagesToPlayers = true;
+    $introImages = $questions['intro_images'] ?? [];
+    $introImageIndex = (int)$quiz['intro_image_index'];
+    $currentIntroImage = null;
+
+    // Handle intro images
+    if ($quiz['phase'] === 'intro') {
+        if ($introImageIndex >= 0 && $introImageIndex < count($introImages)) {
+            $currentIntroImage = $introImages[$introImageIndex];
+        } else if (count($introImages) > 0) {
+            $currentIntroImage = $introImages[0];
+        }
+    }
 
     if ($currentIndex >= 0 && $currentIndex < count($questions['questions'])) {
         $q = $questions['questions'][$currentIndex];
@@ -120,11 +132,15 @@ function build_state_array($quiz, $token = null) {
 
     return [
         'phase'                  => $quiz['phase'],
+        'quizTitle'              => $questions['title'] ?? 'Kahootino Quiz',
         'questionIndex'          => $currentIndex,
         'question'               => $currentQuestion,
         'questionImageIndex'     => (int)$quiz['question_image_index'],
         'answerImageIndex'       => (int)$quiz['answer_image_index'],
         'showImagesToPlayers'    => $showImagesToPlayers,
+        'introImages'            => $introImages,
+        'introImageIndex'        => $introImageIndex,
+        'currentIntroImage'      => $currentIntroImage,
         'serverTime'             => date('c'),
         'questionStartTime'      => $quiz['question_start_time'],
         'questionEndTime'        => $quiz['question_end_time'],

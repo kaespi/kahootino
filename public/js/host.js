@@ -7,17 +7,21 @@ const countdownDisplay = document.getElementById('host-countdown');
 const standingsSection = document.getElementById('standings-section');
 const standingsList = document.getElementById('host-standings-list');
 const imageNavSection = document.getElementById('image-navigation-section');
+const introImageNav = document.getElementById('intro-image-nav');
 const questionImageNav = document.getElementById('question-image-nav');
 const answerImageNav = document.getElementById('answer-image-nav');
 const participantsSection = document.getElementById('participants-section');
 const participantsList = document.getElementById('participants-list');
 const participantsCount = document.getElementById('participants-count');
+const introControls = document.getElementById('intro-controls');
 
 let questions = [];
+let introImages = [];
 let currentPhase = null;
 let currentQuestionIndex = -1;
 let currentQuestionImageIndex = 0;
 let currentAnswerImageIndex = 0;
+let currentIntroImageIndex = 0;
 let countdownInterval = null;
 let countdownEndTime = null;
 let participants = [];
@@ -28,7 +32,9 @@ async function loadQuestions() {
     const res = await fetch('../data/questions.json');
     const data = await res.json();
     questions = data.questions || [];
+    introImages = data.intro_images || [];
     console.log('Questions loaded:', questions.length);
+    console.log('Intro images loaded:', introImages.length);
   } catch (err) {
     console.error('Failed to load questions:', err);
   }
@@ -71,11 +77,19 @@ function handleStateUpdate(data) {
   currentQuestionIndex = data.questionIndex !== undefined ? data.questionIndex : -1;
   currentQuestionImageIndex = data.questionImageIndex !== undefined ? data.questionImageIndex : 0;
   currentAnswerImageIndex = data.answerImageIndex !== undefined ? data.answerImageIndex : 0;
+  currentIntroImageIndex = data.introImageIndex !== undefined ? data.introImageIndex : 0;
   console.log('Updated currentQuestionIndex to:', currentQuestionIndex);
-  console.log('Updated image indices - question:', currentQuestionImageIndex, 'answer:', currentAnswerImageIndex);
+  console.log('Updated image indices - question:', currentQuestionImageIndex, 'answer:', currentAnswerImageIndex, 'intro:', currentIntroImageIndex);
 
   // Update question highlighting
   renderQuestionsList();
+
+  // Show/hide intro controls
+  if (currentPhase === 'intro') {
+    introControls.classList.remove('hidden');
+  } else {
+    introControls.classList.add('hidden');
+  }
 
   // Update image navigation UI
   updateImageNavigationUI();
@@ -138,9 +152,23 @@ function renderStandings(list) {
 
 // Update image navigation UI visibility and button states
 function updateImageNavigationUI() {
-  // Show/hide image navigation section
+  // Show the intro image navigation during intro phase
+  if (currentPhase === 'intro') {
+    imageNavSection.classList.remove('hidden');
+    introImageNav.classList.remove('hidden');
+    questionImageNav.classList.add('hidden');
+    answerImageNav.classList.add('hidden');
+    
+    if (introImages.length > 0) {
+      updateImageNavButtons('intro', currentIntroImageIndex, introImages.length);
+    }
+    return;
+  }
+
+  // Show/hide image navigation section for questions
   if (currentPhase === 'question' || currentPhase === 'reveal') {
     imageNavSection.classList.remove('hidden');
+    introImageNav.classList.add('hidden');
   } else {
     imageNavSection.classList.add('hidden');
     return;

@@ -51,9 +51,49 @@ function renderPresentation(data) {
   // Show participants only during waiting phase
   if (data.phase === 'waiting') {
     showParticipantsOverlay(true);
-  } else {
+    const title = data.quizTitle || window.KAHOOTINO_TITLE || 'Kahootino Quiz';
+    qTitle.textContent = title;
+    qText.textContent = '';
+    qAnswers.innerHTML = '';
+    sTitle.classList.add('hidden');
+    sList.innerHTML = '';
+    qImage.classList.add('hidden');
+    return;
+  }
+
+  // Hide participants overlay for non-waiting phases
+  if (data.phase !== 'waiting') {
     showParticipantsOverlay(false);
   }
+
+  // Handle intro phase
+  if (data.phase === 'intro') {
+    qTitle.textContent = '';
+    qText.textContent = '';
+    qAnswers.innerHTML = '';
+    sTitle.classList.add('hidden');
+    sList.innerHTML = '';
+
+    if (data.currentIntroImage) {
+      qImage.src = '../' + data.currentIntroImage;
+      qImage.classList.remove('hidden');
+    } else {
+      qImage.classList.add('hidden');
+    }
+
+    // Adjust image sizing for intro phase
+    try {
+      requestAnimationFrame(() => {
+        if (!pImageContainer) return;
+        pImageContainer.style.maxHeight = '';
+        qImage.style.maxHeight = '';
+      });
+    } catch (err) {
+      console.error('Failed to adjust presentation image sizing', err);
+    }
+    return;
+  }
+
   if (data.question && data.phase !== 'standings' && data.phase !== 'finished') {
     qText.textContent = data.question.text;
 

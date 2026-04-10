@@ -15,6 +15,11 @@
       "description": "Human-readable title of the quiz (displayed to hosts/presentation).",
       "examples": ["Anna & Tom Wedding Quiz"]
     },
+    "intro_images": {
+      "type": "array",
+      "description": "Optional array of image file paths or URLs to display during the introductory phase before players join (shown in presentation mode).",
+      "items": { "type": "string" }
+    },
     "questions": {
       "type": "array",
       "description": "Ordered list of questions in the quiz. The host advances through these sequentially.",

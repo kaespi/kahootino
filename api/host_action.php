@@ -30,13 +30,14 @@ switch ($action) {
     case 'start_quiz':
         db()->beginTransaction();
 
-        // Reset quiz state
+        // Reset quiz state to intro phase
         $stmt = db()->prepare("
             UPDATE quiz
-            SET phase = 'waiting',
+            SET phase = 'intro',
                 current_question = -1,
                 question_start_time = NULL,
-                question_end_time = NULL
+                question_end_time = NULL,
+                intro_image_index = 0
             WHERE id = ?
         ");
         $stmt->execute([$quiz['id']]);
@@ -52,10 +53,11 @@ switch ($action) {
         db()->commit();
 
         // Update quiz array with new values
-        $quiz['phase'] = 'waiting';
+        $quiz['phase'] = 'intro';
         $quiz['current_question'] = -1;
         $quiz['question_start_time'] = null;
         $quiz['question_end_time'] = null;
+        $quiz['intro_image_index'] = 0;
 
         $state = build_state_array($quiz);
         ably_publish("quiz-$code", "state", $state);
@@ -258,6 +260,82 @@ switch ($action) {
         ably_publish("quiz-$code", "state", $state);
 
         json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['answer_image_index']]);
+        break;
+
+    case 'start_intro':
+        $stmt = db()->prepare("
+            UPDATE quiz
+            SET phase = 'intro',
+                intro_image_index = 0
+            WHERE id = ?
+        ");
+        $stmt->execute([$quiz['id']]);
+
+        $quiz['phase'] = 'intro';
+        $quiz['intro_image_index'] = 0;
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'open_for_joining':
+        $stmt = db()->prepare("
+            UPDATE quiz
+            SET phase = 'waiting',
+                current_question = -1,
+                question_start_time = NULL,
+                question_end_time = NULL
+            WHERE id = ?
+        ");
+        $stmt->execute([$quiz['id']]);
+
+        $quiz['phase'] = 'waiting';
+        $quiz['current_question'] = -1;
+        $quiz['question_start_time'] = null;
+        $quiz['question_end_time'] = null;
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'prev_intro_image':
+        $questions = load_questions();
+        $introImages = $questions['intro_images'] ?? [];
+        $currentImageIndex = (int)$quiz['intro_image_index'];
+
+        if ($currentImageIndex > 0) {
+            $newIndex = $currentImageIndex - 1;
+            $stmt = db()->prepare("UPDATE quiz SET intro_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['intro_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['intro_image_index']]);
+        break;
+
+    case 'next_intro_image':
+        $questions = load_questions();
+        $introImages = $questions['intro_images'] ?? [];
+        $currentImageIndex = (int)$quiz['intro_image_index'];
+
+        if ($currentImageIndex < count($introImages) - 1) {
+            $newIndex = $currentImageIndex + 1;
+            $stmt = db()->prepare("UPDATE quiz SET intro_image_index = ? WHERE id = ?");
+            $stmt->execute([$newIndex, $quiz['id']]);
+            $quiz['intro_image_index'] = $newIndex;
+        }
+
+        $state = build_state_array($quiz);
+        ably_publish("quiz-$code", "state", $state);
+
+        json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['intro_image_index']]);
         break;
 
     default:

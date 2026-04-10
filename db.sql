@@ -6,11 +6,12 @@ CREATE TABLE quiz (
   code VARCHAR(16) UNIQUE NOT NULL,
   title VARCHAR(255) NOT NULL,
   current_question INT DEFAULT -1,
-  phase ENUM('waiting','question','answers','standings','finished','reveal') NOT NULL DEFAULT 'waiting',
+  phase ENUM('intro','waiting','question','answers','standings','finished','reveal') NOT NULL DEFAULT 'intro',
   question_start_time DATETIME NULL,
   question_end_time DATETIME NULL,
   question_image_index INT DEFAULT 0,
   answer_image_index INT DEFAULT 0,
+  intro_image_index INT DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -14,6 +14,11 @@ if (!$quiz) {
     json_response(['error' => 'Quiz not found'], 404);
 }
 
+// Prevent players from joining during intro phase
+if ($quiz['phase'] === 'intro') {
+    json_response(['error' => 'Quiz not yet open for joining'], 400);
+}
+
 $token = bin2hex(random_bytes(16));
 
 try {

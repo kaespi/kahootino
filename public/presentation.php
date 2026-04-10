@@ -5,6 +5,9 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 // Collect all image paths for client-side preloading
 $questions = load_questions();
 $allImages = [];
+foreach ($questions['intro_images'] ?? [] as $img) {
+    $allImages[] = '../' . $img;
+}
 foreach ($questions['questions'] as $q) {
     foreach ($q['images'] ?? [] as $img) {
         $allImages[] = '../' . $img;
@@ -75,6 +78,10 @@ $allImages = array_values(array_unique($allImages));
       border-radius: 6px;
     }
 
+    #p-image.hidden {
+      display: none !important;
+    }
+
     /* Answers and standings reserved area: allow answers to size naturally
        so we can measure their full height and shrink the image accordingly */
     #p-answers {
@@ -131,6 +138,7 @@ $allImages = array_values(array_unique($allImages));
 
   <script>
     window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
+    window.KAHOOTINO_TITLE = <?php echo json_encode($questions['title'], JSON_UNESCAPED_SLASHES); ?>;
   </script>
   <script src="js/presentation.js"></script>
 </body>
