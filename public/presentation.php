@@ -22,7 +22,7 @@ $allImages = array_values(array_unique($allImages));
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Kahootino Quiz - Presentation</title>
+  <title><?php echo htmlspecialchars($questions['title'] ?? 'Kahootino Quiz'); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
@@ -127,7 +127,7 @@ $allImages = array_values(array_unique($allImages));
 </head>
 <body class="presentation">
   <div id="presentation-app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>" style="position:relative; height:100vh;">
-    <h1 id="p-title">Kahootino Quiz</h1>
+    <h1 id="p-title"><?php echo htmlspecialchars($questions['title'] ?? 'Kahootino Quiz'); ?></h1>
     <h2 id="p-question"></h2>
     <h2 id="p-standings-title" class="hidden">Rangliste</h2>
     <ol id="p-standings"></ol>
@@ -141,7 +141,7 @@ $allImages = array_values(array_unique($allImages));
 
   <script>
     window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
-    window.KAHOOTINO_TITLE = <?php echo json_encode($questions['title'], JSON_UNESCAPED_SLASHES); ?>;
+    window.KAHOOTINO_TITLE = <?php echo json_encode($questions['title'] ?? 'Kahootino Quiz', JSON_UNESCAPED_SLASHES); ?>;
   </script>
   <script src="js/presentation.js"></script>
 </body>

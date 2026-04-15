@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/../config.php';
 $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
+$questions = load_questions();
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Kahootino Quiz</title>
+  <title><?php echo htmlspecialchars($questions['title'] ?? 'Kahootino Quiz'); ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
@@ -21,7 +22,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 <body class="player">
   <div id="app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>">
     <div id="join-screen">
-      <h1>Kahootino Quiz</h1>
+      <h1><?php echo htmlspecialchars($questions['title'] ?? 'Kahootino Quiz'); ?></h1>
       <p>Dein Nickname:</p>
       <input type="text" id="nickname" maxlength="64" placeholder="Nickname" autofocus autocomplete="off">
       <button id="join-btn">Beitreten</button>
