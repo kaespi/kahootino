@@ -143,6 +143,32 @@ button {
   background: #0056b3;
 }
 
+#host-controls2 {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+#host-controls2 button {
+  padding: 0.7rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#host-controls2 button:hover {
+  background: #0056b3;
+}
+
 /* Image Navigation Controls */
 #image-navigation-section {
   margin: 1.5rem 0;
@@ -359,6 +385,14 @@ section h2 {
   }
 
   #host-controls button {
+    width: 100%;
+  }
+
+  #host-controls2 {
+    flex-direction: column;
+  }
+
+  #host-controls2 button {
     width: 100%;
   }
 

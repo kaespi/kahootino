@@ -90,7 +90,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     </div>
   </div>
 
-  <div id="host-controls">
+  <div id="host-controls2">
     <button data-action="start_quiz">Quiz starten (reset)</button>
     <button data-action="finish_quiz">Quiz beenden</button>
   </div>
