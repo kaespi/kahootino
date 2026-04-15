@@ -34,6 +34,6 @@ try {
     json_response(['error' => 'Nickname already taken'], 400);
 }
 
-setcookie('quiz_player_token', $token, time() + 60*60*24*30, '/', '', false, true);
+setcookie('quiz_player_token', $token, time() + 60*60*24*30, '/', '', true, true);
 
 json_response(['status' => 'ok', 'token' => $token]);
