@@ -96,7 +96,9 @@ async function joinQuiz() {
 async function loadMe() {
   if (!token) return false;
   const fetchStart = Date.now();
-  const res = await fetch('../api/me.php?code=' + encodeURIComponent(code) + '&token=' + encodeURIComponent(token));
+  const res = await fetch('../api/me.php?code=' + encodeURIComponent(code) + '&token=' + encodeURIComponent(token), {
+    headers: {'X-Quiz-Token': token}
+  });
   const data = await res.json();
   console.log('[LAG] me.php fetch took ' + (Date.now() - fetchStart) + 'ms, status=' + res.status);
   if (!res.ok || data.error) {

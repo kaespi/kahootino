@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 
 $code  = $_GET['code'] ?? null;
-$token = $_GET['token'] ?? ($_COOKIE['quiz_player_token'] ?? null);
+$token = $_GET['token'] ?? $_SERVER['HTTP_X_QUIZ_TOKEN'] ?? ($_COOKIE['quiz_player_token'] ?? null);
 
 if (!$code || !$token) {
     json_response(['error' => 'Missing code or token'], 400);
