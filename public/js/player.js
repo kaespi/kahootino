@@ -144,12 +144,14 @@ async function fetchInitialState() {
     const res = await fetch('../api/state.php?code=' + encodeURIComponent(code), {headers});
     const data = await res.json();
     if (!res.ok || data.error) {
+      console.error('Failed to fetch initial player state:', data.error || res.status);
       show(waitingScreen);
       return false;
     }
     handleStateUpdate(data);
     return true;
-  } catch (_) {
+  } catch (err) {
+    console.error('Error fetching initial player state:', err);
     show(waitingScreen);
     return false;
   }
