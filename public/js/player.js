@@ -107,7 +107,7 @@ async function loadMe() {
 }
 
 function startSSE() {
-  const url = '../api/state_sse.php?code=' + encodeURIComponent(code) + (token ? '&token=' + encodeURIComponent(token) : '');
+  const url = '../api/state_sse.php?code=' + encodeURIComponent(code);
   const evt = new EventSource(url);
 
   evt.onmessage = (event) => {
@@ -139,14 +139,20 @@ function startAbly() {
 }
 
 async function fetchInitialState() {
-  const res = await fetch('../api/state.php?code=' + encodeURIComponent(code) + (token ? '&token=' + encodeURIComponent(token) : ''));
-  const data = await res.json();
-  if (!res.ok || data.error) {
+  try {
+    const headers = token ? {'X-Quiz-Token': token} : {};
+    const res = await fetch('../api/state.php?code=' + encodeURIComponent(code), {headers});
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      show(waitingScreen);
+      return false;
+    }
+    handleStateUpdate(data);
+    return true;
+  } catch (_) {
     show(waitingScreen);
     return false;
   }
-  handleStateUpdate(data);
-  return true;
 }
 
 function handleStateUpdate(data) {

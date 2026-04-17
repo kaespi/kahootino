@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../config.php';
 
 $code  = $_GET['code'] ?? null;
-$token = $_GET['token'] ?? null;
+$token = $_GET['token'] ?? ($_COOKIE['quiz_player_token'] ?? null);
 
 if (!$code) {
     header('Content-Type: text/event-stream');
