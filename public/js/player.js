@@ -288,7 +288,7 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
     const driftSec = remaining - clientRemaining;
     console.log('[LAG] Countdown: server says ' + remaining + 's remaining, client clock says ' + clientRemaining + 's (drift=' + driftSec + 's)');
     // --- end diagnostics ---
-    startCountdown(remaining);
+    startCountdown(remaining, q.countdownSeconds);
   }
 }
 
@@ -391,7 +391,7 @@ function renderStandings(list) {
   }
 }
 
-function startCountdown(seconds) {
+function startCountdown(seconds, total) {
   if (seconds <= 0) {
     if (countdownContainer) {
       countdownContainer.classList.add('hidden');
@@ -400,7 +400,7 @@ function startCountdown(seconds) {
   }
   if (countdownInterval) return; // Already running
   if (!countdownBar || !countdownContainer) return;
-  totalQuestionTime = seconds;
+  totalQuestionTime = (total && total > 0) ? total : seconds;
   countdownContainer.classList.remove('hidden');
   countdownBar.style.width = '100%';
   let remaining = seconds;
