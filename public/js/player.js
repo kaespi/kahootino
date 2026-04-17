@@ -89,7 +89,7 @@ async function joinQuiz() {
   localStorage.setItem('quiz_player_token', token);
   localStorage.setItem('quiz_code', code);
   playerName.textContent = nickname;
-  show(waitingScreen);
+  await fetchInitialState();
   startAbly();
 }
 
@@ -136,6 +136,17 @@ function startAbly() {
     const data = msg.data;
     handleStateUpdate(data);
   });
+}
+
+async function fetchInitialState() {
+  const res = await fetch('../api/state.php?code=' + encodeURIComponent(code) + (token ? '&token=' + encodeURIComponent(token) : ''));
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    show(waitingScreen);
+    return false;
+  }
+  handleStateUpdate(data);
+  return true;
 }
 
 function handleStateUpdate(data) {
@@ -433,7 +444,7 @@ nicknameInput.addEventListener('keydown', (e) => {
     token = storedToken;
     const ok = await loadMe();
     if (ok) {
-      show(rejoinedScreen);
+      await fetchInitialState();
       startAbly();
       return;
     }
@@ -447,7 +458,7 @@ nicknameInput.addEventListener('keydown', (e) => {
   if (token) {
     const ok = await loadMe();
     if (ok) {
-      show(waitingScreen);
+      await fetchInitialState();
       startAbly();
       return;
     }
