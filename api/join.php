@@ -6,17 +6,17 @@ $code     = $_POST['code'] ?? null;
 $nickname = trim($_POST['nickname'] ?? '');
 
 if (!$code || $nickname === '') {
-    json_response(['error' => 'Missing code or nickname'], 400);
+    json_response(['error' => 'Fehlender Code oder Nickname'], 400);
 }
 
 $quiz = get_quiz_by_code($code);
 if (!$quiz) {
-    json_response(['error' => 'Quiz not found'], 404);
+    json_response(['error' => 'Quiz nicht gefunden'], 404);
 }
 
 // Prevent players from joining during intro phase
 if ($quiz['phase'] === 'intro') {
-    json_response(['error' => 'Quiz not yet open for joining'], 400);
+    json_response(['error' => 'Quiz noch nicht für die Teilnahme geöffnet'], 400);
 }
 
 $token = bin2hex(random_bytes(16));
