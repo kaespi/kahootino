@@ -430,3 +430,67 @@ section h2 {
   box-sizing: border-box;
   border-radius: 4px;
 }
+
+/* ---- Debug overlay (activate with ?debug=1) ---- */
+#debug-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.88);
+  color: #eee;
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.35;
+  max-height: 45vh;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+#debug-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid #444;
+  flex-shrink: 0;
+}
+
+#debug-overlay-header span:first-child {
+  font-weight: bold;
+  color: #8cf;
+}
+
+#debug-overlay-header button {
+  background: none;
+  border: 1px solid #666;
+  color: #ccc;
+  font-size: 11px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#debug-overlay-log {
+  overflow-y: auto;
+  padding: 4px 8px;
+  flex: 1 1 auto;
+}
+
+#debug-overlay-log.debug-collapsed {
+  display: none;
+}
+
+.debug-entry {
+  padding: 1px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  word-break: break-all;
+}
+
+.debug-log { color: #ddd; }
+.debug-warn { color: #fd0; }
+.debug-error { color: #f66; }

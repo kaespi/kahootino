@@ -95,6 +95,7 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     <button data-action="finish_quiz">Quiz beenden</button>
   </div>
 
+  <script src="js/debug-overlay.js"></script>
   <script src="js/host.js"></script>
 </body>
 </html>

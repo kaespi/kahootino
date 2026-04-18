@@ -143,6 +143,7 @@ $allImages = array_values(array_unique($allImages));
     window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
     window.KAHOOTINO_TITLE = <?php echo json_encode($questions['title'] ?? 'Kahootino Quiz', JSON_UNESCAPED_SLASHES); ?>;
   </script>
+  <script src="js/debug-overlay.js"></script>
   <script src="js/presentation.js"></script>
 </body>
 </html>

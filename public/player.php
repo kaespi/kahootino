@@ -56,6 +56,7 @@ $questions = load_questions();
     </div>
   </div>
 
+  <script src="js/debug-overlay.js"></script>
   <script src="js/player.js"></script>
 </body>
 </html>
