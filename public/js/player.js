@@ -179,7 +179,7 @@ function handleStateUpdate(data) {
   hasAnswered = data.hasAnswered;
   questionEndTime = data.questionEndTime ? new Date(data.questionEndTime) : null;
 
-  if (data.phase === 'waiting') {
+  if (data.phase === 'waiting' || data.phase === 'intro') {
     show(waitingScreen);
     stopCountdown();
   } else if (data.phase === 'question') {
@@ -454,7 +454,16 @@ nicknameInput.addEventListener('keydown', (e) => {
     token = storedToken;
     const ok = await loadMe();
     if (ok) {
-      await fetchInitialState();
+      show(rejoinedScreen); // explicit loading state while fetching current game phase
+      let stateFetched = false;
+      let retries = 0;
+      while (!stateFetched && retries < 5) {
+        stateFetched = await fetchInitialState();
+        if (!stateFetched) {
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
       startAbly();
       return;
     }

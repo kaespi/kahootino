@@ -1,4 +1,6 @@
 <?php
+// Suppress PHP warning/notice output so they cannot corrupt JSON API responses
+ini_set('display_errors', '0');
 // load credentials from config.local.php
 require_once __DIR__ . '/config.local.php';
 
