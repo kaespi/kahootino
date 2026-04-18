@@ -33,6 +33,13 @@ function startAbly() {
   const client = new Ably.Realtime(ablyKey);
   const channel = client.channels.get('quiz-' + codeP);
 
+  // --- Ably connection diagnostics ---
+  client.connection.on(function(stateChange) {
+    console.log('[LAG] Ably connection: ' + stateChange.previous + ' → ' + stateChange.current +
+      (stateChange.reason ? ' (' + stateChange.reason.message + ')' : ''));
+  });
+  // --- end diagnostics ---
+
   channel.subscribe('state', (msg) => {
     const data = msg.data;
     renderPresentation(data);
