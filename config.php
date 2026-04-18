@@ -112,6 +112,7 @@ function build_state_array($quiz, $token = null) {
 
     $player = null;
     $hasAnswered = false;
+    $selectedAnswerIndex = null;
 
     if ($token) {
         $stmt = db()->prepare("SELECT * FROM player WHERE quiz_id = ? AND cookie_token = ?");
@@ -119,9 +120,11 @@ function build_state_array($quiz, $token = null) {
         $player = $stmt->fetch();
 
         if ($player && $currentIndex >= 0) {
-            $stmt = db()->prepare("SELECT id FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
+            $stmt = db()->prepare("SELECT chosen_option FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
             $stmt->execute([$quiz['id'], $player['id'], $currentIndex]);
-            $hasAnswered = (bool)$stmt->fetch();
+            $answerRow = $stmt->fetch();
+            $hasAnswered = (bool)$answerRow;
+            $selectedAnswerIndex = $hasAnswered ? (int)$answerRow['chosen_option'] : null;
         }
     }
 
@@ -147,6 +150,7 @@ function build_state_array($quiz, $token = null) {
         'questionStartTime'      => $quiz['question_start_time'],
         'questionEndTime'        => $quiz['question_end_time'],
         'hasAnswered'            => $hasAnswered,
+        'selectedAnswerIndex'    => $selectedAnswerIndex,
         'standings'              => $standings,
     ];
 }

@@ -179,6 +179,11 @@ function handleStateUpdate(data) {
   hasAnswered = data.hasAnswered;
   questionEndTime = data.questionEndTime ? new Date(data.questionEndTime) : null;
 
+  // Restore the previously selected answer from the server (survives page reload)
+  if (data.selectedAnswerIndex != null) {
+    selectedByQuestion[data.questionIndex] = data.selectedAnswerIndex;
+  }
+
   if (data.phase === 'waiting' || data.phase === 'intro') {
     show(waitingScreen);
     stopCountdown();
