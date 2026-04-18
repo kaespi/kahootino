@@ -16,16 +16,16 @@ $questionIndex = isset($_POST['questionIndex']) ? (int)$_POST['questionIndex'] :
 $chosenOption  = isset($_POST['chosenOption']) ? (int)$_POST['chosenOption'] : null;
 
 if (!$code || !$token || $questionIndex === null || $chosenOption === null) {
-    timed_json_response(['error' => 'Missing parameters'], 400);
+    timed_json_response(['error' => 'Fehlende Parameter'], 400);
 }
 
 $quiz = get_quiz_by_code($code);
 if (!$quiz) {
-    timed_json_response(['error' => 'Quiz not found'], 404);
+    timed_json_response(['error' => 'Quiz nicht gefunden'], 404);
 }
 
 if ($quiz['phase'] !== 'answers') {
-    timed_json_response(['error' => 'Not accepting answers now'], 400);
+    timed_json_response(['error' => 'Antworten werden derzeit nicht akzeptiert'], 400);
 }
 
 // use high-resolution current time so scoring isn't quantized to seconds
@@ -34,7 +34,7 @@ $end = $quiz['question_end_time'] ? strtotime($quiz['question_end_time']) : null
 $questionStart = $quiz['question_start_time'] ? strtotime($quiz['question_start_time']) : null;
 
 if ($questionStart === null || $end === null || $now > $end) {
-    timed_json_response(['error' => 'Time is up'], 400);
+    timed_json_response(['error' => 'Zeit abgelaufen'], 400);
 }
 
 // fetch only id to reduce payload and parsing
@@ -42,19 +42,19 @@ $stmt = db()->prepare("SELECT id FROM player WHERE quiz_id = ? AND cookie_token 
 $stmt->execute([$quiz['id'], $token]);
 $playerId = $stmt->fetchColumn();
 if (!$playerId) {
-    timed_json_response(['error' => 'Player not found'], 404);
+    timed_json_response(['error' => 'Spieler nicht gefunden'], 404);
 }
 
 // prevent double answer (fast existence check)
 $stmt = db()->prepare("SELECT id FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
 $stmt->execute([$quiz['id'], $playerId, $questionIndex]);
 if ($stmt->fetchColumn()) {
-    timed_json_response(['error' => 'Already answered'], 400);
+    timed_json_response(['error' => 'Bereits beantwortet'], 400);
 }
 
 $questions = load_questions();
 if (!isset($questions['questions'][$questionIndex])) {
-    timed_json_response(['error' => 'Invalid question index'], 400);
+    timed_json_response(['error' => 'Ungültiger Fragenindex'], 400);
 }
 $q = $questions['questions'][$questionIndex];
 
@@ -91,7 +91,7 @@ try {
     db()->commit();
 } catch (Exception $e) {
     db()->rollBack();
-    timed_json_response(['error' => 'Failed to save answer'], 500);
+    timed_json_response(['error' => 'Antwort konnte nicht gespeichert werden'], 500);
 }
 
 timed_json_response(['status' => 'ok', 'points' => $points, 'isCorrect' => (bool)$isCorrect]);
