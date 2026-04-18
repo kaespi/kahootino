@@ -89,14 +89,16 @@ async function joinQuiz() {
   localStorage.setItem('quiz_player_token', token);
   localStorage.setItem('quiz_code', code);
   playerName.textContent = nickname;
-  show(waitingScreen);
+  await fetchInitialState();
   startAbly();
 }
 
 async function loadMe() {
   if (!token) return false;
   const fetchStart = Date.now();
-  const res = await fetch('../api/me.php?code=' + encodeURIComponent(code) + '&token=' + encodeURIComponent(token));
+  const res = await fetch('../api/me.php?code=' + encodeURIComponent(code) + '&token=' + encodeURIComponent(token), {
+    headers: {'X-Quiz-Token': token}
+  });
   const data = await res.json();
   console.log('[LAG] me.php fetch took ' + (Date.now() - fetchStart) + 'ms, status=' + res.status);
   if (!res.ok || data.error) {
@@ -107,7 +109,7 @@ async function loadMe() {
 }
 
 function startSSE() {
-  const url = '../api/state_sse.php?code=' + encodeURIComponent(code) + (token ? '&token=' + encodeURIComponent(token) : '');
+  const url = '../api/state_sse.php?code=' + encodeURIComponent(code);
   const evt = new EventSource(url);
 
   evt.onmessage = (event) => {
@@ -138,6 +140,25 @@ function startAbly() {
   });
 }
 
+async function fetchInitialState() {
+  try {
+    const headers = token ? {'X-Quiz-Token': token} : {};
+    const res = await fetch('../api/state.php?code=' + encodeURIComponent(code), {headers});
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      console.error('Failed to fetch initial player state:', data.error || res.status);
+      show(waitingScreen);
+      return false;
+    }
+    handleStateUpdate(data);
+    return true;
+  } catch (err) {
+    console.error('Error fetching initial player state:', err);
+    show(waitingScreen);
+    return false;
+  }
+}
+
 function handleStateUpdate(data) {
   // --- Lag diagnostics ---
   const receiveTime = Date.now();
@@ -158,7 +179,12 @@ function handleStateUpdate(data) {
   hasAnswered = data.hasAnswered;
   questionEndTime = data.questionEndTime ? new Date(data.questionEndTime) : null;
 
-  if (data.phase === 'waiting') {
+  // Restore the previously selected answer from the server (survives page reload)
+  if (data.selectedAnswerIndex != null) {
+    selectedByQuestion[data.questionIndex] = data.selectedAnswerIndex;
+  }
+
+  if (data.phase === 'waiting' || data.phase === 'intro') {
     show(waitingScreen);
     stopCountdown();
   } else if (data.phase === 'question') {
@@ -267,7 +293,7 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
     const driftSec = remaining - clientRemaining;
     console.log('[LAG] Countdown: server says ' + remaining + 's remaining, client clock says ' + clientRemaining + 's (drift=' + driftSec + 's)');
     // --- end diagnostics ---
-    startCountdown(remaining);
+    startCountdown(remaining, q.countdownSeconds);
   }
 }
 
@@ -370,7 +396,7 @@ function renderStandings(list) {
   }
 }
 
-function startCountdown(seconds) {
+function startCountdown(seconds, total) {
   if (seconds <= 0) {
     if (countdownContainer) {
       countdownContainer.classList.add('hidden');
@@ -379,7 +405,7 @@ function startCountdown(seconds) {
   }
   if (countdownInterval) return; // Already running
   if (!countdownBar || !countdownContainer) return;
-  totalQuestionTime = seconds;
+  totalQuestionTime = (total && total > 0) ? total : seconds;
   countdownContainer.classList.remove('hidden');
   countdownBar.style.width = '100%';
   let remaining = seconds;
@@ -433,7 +459,16 @@ nicknameInput.addEventListener('keydown', (e) => {
     token = storedToken;
     const ok = await loadMe();
     if (ok) {
-      show(rejoinedScreen);
+      show(rejoinedScreen); // explicit loading state while fetching current game phase
+      let stateFetched = false;
+      let retries = 0;
+      while (!stateFetched && retries < 5) {
+        stateFetched = await fetchInitialState();
+        if (!stateFetched) {
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
       startAbly();
       return;
     }
@@ -447,7 +482,7 @@ nicknameInput.addEventListener('keydown', (e) => {
   if (token) {
     const ok = await loadMe();
     if (ok) {
-      show(waitingScreen);
+      await fetchInitialState();
       startAbly();
       return;
     }
