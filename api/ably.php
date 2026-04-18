@@ -5,7 +5,9 @@ function ably_publish($channel, $event, $data) {
     global $ABLY_API_KEY;
 
     // Attach high-resolution publish timestamp for client-side latency measurement
-    $data['publishedAt'] = date('c');
+    // Use millisecond precision for sub-second latency detection
+    $now = microtime(true);
+    $data['publishedAt'] = date('Y-m-d\TH:i:s', (int)$now) . sprintf('.%03d', ($now - floor($now)) * 1000) . date('P');
 
     $payload = json_encode([
         'name' => $event,
