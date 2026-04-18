@@ -72,6 +72,20 @@ async function hostAction(action) {
 
 // Handle real-time state updates
 function handleStateUpdate(data) {
+  // --- Lag diagnostics ---
+  const receiveTime = Date.now();
+  if (data.publishedAt) {
+    const publishMs = new Date(data.publishedAt).getTime();
+    const latencyMs = receiveTime - publishMs;
+    console.log('[LAG] Ably delivery latency: ' + latencyMs + 'ms (phase=' + data.phase + ')');
+  }
+  if (data.serverTime) {
+    const serverMs = new Date(data.serverTime).getTime();
+    const driftMs = receiveTime - serverMs;
+    console.log('[LAG] Clock drift (client − server): ' + driftMs + 'ms');
+  }
+  // --- end diagnostics ---
+
   console.log('State update received:', data);
   currentPhase = data.phase;
   currentQuestionIndex = data.questionIndex !== undefined ? data.questionIndex : -1;

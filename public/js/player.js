@@ -128,6 +128,21 @@ function startAbly() {
 }
 
 function handleStateUpdate(data) {
+  // --- Lag diagnostics ---
+  const receiveTime = Date.now();
+  if (data.publishedAt) {
+    const publishMs = new Date(data.publishedAt).getTime();
+    const latencyMs = receiveTime - publishMs;
+    console.log('[LAG] Ably delivery latency: ' + latencyMs + 'ms (phase=' + data.phase + ')');
+  }
+  if (data.serverTime) {
+    const serverMs = new Date(data.serverTime).getTime();
+    const driftMs = receiveTime - serverMs;
+    console.log('[LAG] Clock drift (client − server): ' + driftMs + 'ms');
+  }
+  console.log('[LAG] State update received: phase=' + data.phase + ', questionIndex=' + data.questionIndex);
+  // --- end diagnostics ---
+
   currentQuestionIndex = data.questionIndex;
   hasAnswered = data.hasAnswered;
   questionEndTime = data.questionEndTime ? new Date(data.questionEndTime) : null;
