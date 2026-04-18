@@ -4,6 +4,9 @@ require_once __DIR__ . '/../config.php';
 function ably_publish($channel, $event, $data) {
     global $ABLY_API_KEY;
 
+    // Attach high-resolution publish timestamp for client-side latency measurement
+    $data['publishedAt'] = date('c');
+
     $payload = json_encode([
         'name' => $event,
         'data' => $data
