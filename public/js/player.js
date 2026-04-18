@@ -62,11 +62,13 @@ async function joinQuiz() {
 
   let res;
   try {
+    const fetchStart = Date.now();
     res = await fetch('../api/join.php', {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
     body: new URLSearchParams({code, nickname})
     });
+    console.log('[LAG] join.php fetch took ' + (Date.now() - fetchStart) + 'ms, status=' + res.status);
   } catch (err) {
     joinError.textContent = 'Beitritt fehlgeschlagen';
     joinBtn.disabled = false;
@@ -93,8 +95,10 @@ async function joinQuiz() {
 
 async function loadMe() {
   if (!token) return false;
+  const fetchStart = Date.now();
   const res = await fetch('../api/me.php?code=' + encodeURIComponent(code) + '&token=' + encodeURIComponent(token));
   const data = await res.json();
+  console.log('[LAG] me.php fetch took ' + (Date.now() - fetchStart) + 'ms, status=' + res.status);
   if (!res.ok || data.error) {
     return false;
   }
@@ -256,6 +260,7 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
 
 async function submitAnswer(idx) {
   if (hasAnswered) return;
+  const fetchStart = Date.now();
   const res = await fetch('../api/answer.php', {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -267,6 +272,8 @@ async function submitAnswer(idx) {
     })
   });
   const data = await res.json();
+  const fetchDuration = Date.now() - fetchStart;
+  console.log('[LAG] answer.php fetch took ' + fetchDuration + 'ms, status=' + res.status + (data.duration_ms ? ', server processing=' + data.duration_ms + 'ms' : ''));
   if (!res.ok || data.error) {
     answerStatus.textContent = data.error || 'Antwort konnte nicht gesendet werden.';
     return;
