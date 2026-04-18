@@ -254,6 +254,12 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
     const serverNow = new Date(serverTime);
     const end = new Date(endTime);
     let remaining = Math.max(0, Math.floor((end - serverNow) / 1000));
+    // --- Countdown drift diagnostics ---
+    const clientNow = new Date();
+    const clientRemaining = Math.max(0, Math.floor((end - clientNow) / 1000));
+    const driftSec = remaining - clientRemaining;
+    console.log('[LAG] Countdown: server says ' + remaining + 's remaining, client clock says ' + clientRemaining + 's (drift=' + driftSec + 's)');
+    // --- end diagnostics ---
     startCountdown(remaining);
   }
 }
