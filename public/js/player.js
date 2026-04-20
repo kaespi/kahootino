@@ -37,6 +37,7 @@ let totalQuestionTime = 0;
 let lastRenderedQuestionIndex = -1;
 // store selected answer per question index so selection survives phase updates
 let selectedByQuestion = {};
+let wakeLock = null;
 
 function getCookie(name) {
   const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -47,6 +48,32 @@ function show(screen) {
   [joinScreen, waitingScreen, rejoinedScreen, questionScreen, standingsScreen].forEach(s => s.classList.add('hidden'));
   screen.classList.remove('hidden');
 }
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err.message);
+    }
+  }
+}
+
+// When the page becomes visible again (e.g. after screen off), re-acquire the wake
+// lock and re-sync state in case any Ably messages were missed while hidden.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (wakeLock === null) {
+      requestWakeLock();
+    }
+    if (token) {
+      fetchInitialState();
+    }
+  }
+});
 
 async function joinQuiz() {
   const nickname = nicknameInput.value.trim();
@@ -89,6 +116,7 @@ async function joinQuiz() {
   localStorage.setItem('quiz_player_token', token);
   localStorage.setItem('quiz_code', code);
   playerName.textContent = nickname;
+  requestWakeLock();
   await fetchInitialState();
   startAbly();
 }
@@ -200,9 +228,15 @@ function handleStateUpdate(data) {
     show(questionScreen);
     stopCountdown();
   } else if (data.phase === 'standings' || data.phase === 'finished') {
-    renderStandings(data.standings || []);
     show(standingsScreen);
     stopCountdown();
+    if (data.standings && data.standings.length > 0) {
+      renderStandings(data.standings);
+    } else {
+      // Standings missing from push message – clear stale data and fetch from server
+      standingsList.innerHTML = '';
+      fetchInitialState();
+    }
   }
 }
 
@@ -459,6 +493,7 @@ nicknameInput.addEventListener('keydown', (e) => {
     token = storedToken;
     const ok = await loadMe();
     if (ok) {
+      requestWakeLock();
       show(rejoinedScreen); // explicit loading state while fetching current game phase
       let stateFetched = false;
       let retries = 0;
@@ -482,6 +517,7 @@ nicknameInput.addEventListener('keydown', (e) => {
   if (token) {
     const ok = await loadMe();
     if (ok) {
+      requestWakeLock();
       await fetchInitialState();
       startAbly();
       return;
