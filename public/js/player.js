@@ -38,6 +38,7 @@ let lastRenderedQuestionIndex = -1;
 // store selected answer per question index so selection survives phase updates
 let selectedByQuestion = {};
 let wakeLock = null;
+let quizFinished = false;
 
 function getCookie(name) {
   const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -62,11 +63,22 @@ async function requestWakeLock() {
   }
 }
 
+async function releaseWakeLock() {
+  if (wakeLock !== null) {
+    try {
+      await wakeLock.release();
+    } catch (err) {
+      console.warn('Wake lock release failed:', err.message);
+    }
+    wakeLock = null;
+  }
+}
+
 // When the page becomes visible again (e.g. after screen off), re-acquire the wake
 // lock and re-sync state in case any Ably messages were missed while hidden.
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    if (wakeLock === null) {
+    if (wakeLock === null && !quizFinished && token) {
       requestWakeLock();
     }
     if (token) {
@@ -187,7 +199,7 @@ async function fetchInitialState() {
   }
 }
 
-function handleStateUpdate(data) {
+async function handleStateUpdate(data) {
   // --- Lag diagnostics ---
   const receiveTime = Date.now();
   if (data.publishedAt) {
@@ -230,6 +242,10 @@ function handleStateUpdate(data) {
   } else if (data.phase === 'standings' || data.phase === 'finished') {
     show(standingsScreen);
     stopCountdown();
+    if (data.phase === 'finished') {
+      quizFinished = true;
+      await releaseWakeLock();
+    }
     if (data.standings && data.standings.length > 0) {
       renderStandings(data.standings);
     } else {
