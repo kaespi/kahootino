@@ -283,6 +283,18 @@ const _preloadedImages = (window.KAHOOTINO_IMAGES || []).map(src => {
   return img;
 });
 
+// Preload videos by creating hidden <video preload="auto"> elements kept alive in memory.
+// This ensures the browser fetches and buffers video content before it is needed.
+const _preloadedVideos = (window.KAHOOTINO_VIDEOS || []).map(src => {
+  const vid = document.createElement('video');
+  vid.preload = 'auto';
+  vid.muted = true;
+  vid.src = src;
+  vid.style.display = 'none';
+  document.body.appendChild(vid);
+  return vid;
+});
+
 // Fetch current players on load and render them (preserve positions)
 async function fetchPlayers() {
   try {

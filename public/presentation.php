@@ -17,8 +17,9 @@ foreach ($questions['questions'] as $q) {
     }
 }
 $allMedia = array_values(array_unique($allMedia));
-// Separate images (preloadable via <link>) from videos
+// Separate images (preloadable via <link rel="preload" as="image">) from videos
 $allImages = array_values(array_filter($allMedia, fn($p) => !preg_match('/\.mp4$/i', $p)));
+$allVideos = array_values(array_filter($allMedia, fn($p) =>  preg_match('/\.mp4$/i', $p)));
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -37,6 +38,9 @@ $allImages = array_values(array_filter($allMedia, fn($p) => !preg_match('/\.mp4$
   <meta name="theme-color" content="#ffffff">
 <?php foreach ($allImages as $imgPath): ?>
   <link rel="preload" as="image" href="<?php echo htmlspecialchars($imgPath); ?>">
+<?php endforeach; ?>
+<?php foreach ($allVideos as $vidPath): ?>
+  <link rel="preload" as="video" type="video/mp4" href="<?php echo htmlspecialchars($vidPath); ?>">
 <?php endforeach; ?>
   <style>
     html, body {
@@ -148,6 +152,7 @@ $allImages = array_values(array_filter($allMedia, fn($p) => !preg_match('/\.mp4$
 
   <script>
     window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
+    window.KAHOOTINO_VIDEOS = <?php echo json_encode($allVideos, JSON_UNESCAPED_SLASHES); ?>;
     window.KAHOOTINO_TITLE = <?php echo json_encode($questions['title'] ?? 'Kahootino Quiz', JSON_UNESCAPED_SLASHES); ?>;
   </script>
   <script src="js/debug-overlay.js"></script>
