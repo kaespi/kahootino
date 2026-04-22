@@ -22,6 +22,8 @@ if (params.get('reset') === '1') {
 
 const questionText = document.getElementById('question-text');
 const questionImage = document.getElementById('question-image');
+const questionVideo = document.getElementById('question-video');
+const questionReplayBtn = document.getElementById('question-replay-btn');
 const answersDiv = document.getElementById('answers');
 const countdownContainer = document.getElementById('countdown-container');
 const countdownBar = document.getElementById('countdown-bar');
@@ -43,6 +45,62 @@ let quizFinished = false;
 function getCookie(name) {
   const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
   return m ? m.pop() : '';
+}
+
+/** Returns true if the given file path is an MP4 video. */
+function isVideo(src) {
+  return /\.mp4$/i.test(src);
+}
+
+/**
+ * Show a question image or video for the player question screen.
+ * Pass null/undefined to hide all media.
+ */
+function showQuestionMedia(src) {
+  if (!src) {
+    questionImage.classList.add('hidden');
+    questionImage.style.display = 'none';
+    if (questionVideo) {
+      questionVideo.classList.add('hidden');
+      questionVideo.style.display = 'none';
+      questionVideo.pause();
+      questionVideo.removeAttribute('src');
+    }
+    if (questionReplayBtn) questionReplayBtn.classList.add('hidden');
+    return;
+  }
+  if (isVideo(src)) {
+    questionImage.classList.add('hidden');
+    questionImage.style.display = 'none';
+    if (questionVideo) {
+      questionVideo.src = src;
+      questionVideo.classList.remove('hidden');
+      questionVideo.style.display = '';
+      questionVideo.load();
+      questionVideo.play().catch(() => {});
+    }
+    if (questionReplayBtn) questionReplayBtn.classList.remove('hidden');
+  } else {
+    if (questionVideo) {
+      questionVideo.classList.add('hidden');
+      questionVideo.style.display = 'none';
+      questionVideo.pause();
+      questionVideo.removeAttribute('src');
+    }
+    if (questionReplayBtn) questionReplayBtn.classList.add('hidden');
+    questionImage.src = src;
+    questionImage.classList.remove('hidden');
+    questionImage.style.display = '';
+  }
+}
+
+if (questionReplayBtn) {
+  questionReplayBtn.addEventListener('click', () => {
+    if (questionVideo && !questionVideo.classList.contains('hidden')) {
+      questionVideo.currentTime = 0;
+      questionVideo.play().catch(() => {});
+    }
+  });
 }
 
 function show(screen) {
@@ -260,39 +318,50 @@ function renderQuestion(q, serverTime, endTime, phase, questionImageIndex = 0, a
   if (!q) return;
   questionText.textContent = q.text;
 
-  // Show question image only during 'question' phase and if showImagesToPlayers is true
+  // Show question image/video only during 'question' phase and if showImagesToPlayers is true
   if (phase === 'question' && q.images && q.images.length > 0 && showImagesToPlayers) {
-    const imageToShow = q.images[questionImageIndex] || q.images[0];
-    questionImage.src = '../' + imageToShow;
-    questionImage.classList.remove('hidden');
-    // ensure visible even if inline styles existed
-    questionImage.style.display = '';
+    const mediaToShow = q.images[questionImageIndex] || q.images[0];
+    showQuestionMedia('../' + mediaToShow);
   } else {
-    // explicitly hide the question image to avoid leftover visibility
-    questionImage.classList.add('hidden');
-    questionImage.style.display = 'none';
+    showQuestionMedia(null);
   }
 
-  // Show answer image only during 'reveal' phase if showImagesToPlayers is true
-  let answerImageToShow = null;
+  // Show answer image/video only during 'reveal' phase if showImagesToPlayers is true
+  let answerMediaToShow = null;
   if (q.answerImages && q.answerImages.length > 0 && showImagesToPlayers && phase === 'reveal') {
-    answerImageToShow = q.answerImages[answerImageIndex] || q.answerImages[0];
+    answerMediaToShow = q.answerImages[answerImageIndex] || q.answerImages[0];
   }
 
   answersDiv.innerHTML = '';
 
   // Only render answer buttons if endTime is set (answers should be visible)
   if (endTime) {
-    // If we're in the reveal phase and an answer image exists, place it above the answers
-    if (answerImageToShow && phase === 'reveal') {
-      const imgContainer = document.createElement('div');
-      imgContainer.className = 'answer-image';
-      imgContainer.style.marginBottom = '0.75rem';
-      const img = document.createElement('img');
-      img.src = '../' + answerImageToShow;
-      img.alt = '';
-      imgContainer.appendChild(img);
-      answersDiv.appendChild(imgContainer);
+    // If we're in the reveal phase and an answer media exists, place it above the answers
+    if (answerMediaToShow && phase === 'reveal') {
+      const mediaContainer = document.createElement('div');
+      mediaContainer.className = 'answer-image';
+      mediaContainer.style.marginBottom = '0.75rem';
+      const answerSrc = '../' + answerMediaToShow;
+      if (isVideo(answerSrc)) {
+        const vid = document.createElement('video');
+        vid.src = answerSrc;
+        vid.autoplay = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.addEventListener('canplay', () => vid.play().catch(() => {}));
+        const replayBtn = document.createElement('button');
+        replayBtn.textContent = '↺ Wiederholen';
+        replayBtn.className = 'replay-btn';
+        replayBtn.addEventListener('click', () => { vid.currentTime = 0; vid.play().catch(() => {}); });
+        mediaContainer.appendChild(vid);
+        mediaContainer.appendChild(replayBtn);
+      } else {
+        const img = document.createElement('img');
+        img.src = answerSrc;
+        img.alt = '';
+        mediaContainer.appendChild(img);
+      }
+      answersDiv.appendChild(mediaContainer);
     }
 
     q.answers.forEach((ans, idx) => {

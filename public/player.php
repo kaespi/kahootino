@@ -42,6 +42,8 @@ $questions = load_questions();
     <div id="question-screen" class="hidden">
       <h2 id="question-text"></h2>
       <img id="question-image" class="hidden" alt="">
+      <video id="question-video" class="hidden" autoplay muted playsinline></video>
+      <button id="question-replay-btn" class="replay-btn hidden">↺ Wiederholen</button>
       <div id="answers"></div>
       <div id="countdown-container">
         <div id="countdown-bar"></div>

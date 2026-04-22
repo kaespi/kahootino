@@ -406,22 +406,24 @@ section h2 {
   }
 }
 
-/* Player: scale and center question images responsively
-   - shrink images that are wider than the viewport to avoid horizontal scrolling
-   - keep smaller images at their natural size and center them
-   - ensure image keeps aspect ratio when device rotates */
-.player #question-image {
+/* Player: scale and center question images/videos responsively
+   - shrink media that is wider than the viewport to avoid horizontal scrolling
+   - keep smaller media at their natural size and center it
+   - ensure media keeps aspect ratio when device rotates */
+.player #question-image,
+.player #question-video {
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 0.5rem auto; /* center smaller images and add small vertical gap */
+  margin: 0.5rem auto; /* center smaller media and add small vertical gap */
   box-sizing: border-box;
-  /* prevent the image from causing horizontal overflow */
+  /* prevent the media from causing horizontal overflow */
   max-width: calc(100vw - 2rem);
 }
 
-/* Answer image shown during reveal phase: behave like question image and center */
-.player .answer-image img {
+/* Answer image/video shown during reveal phase: behave like question media and center */
+.player .answer-image img,
+.player .answer-image video {
   display: block;
   width: auto;
   max-width: calc(100vw - 2rem);
@@ -429,6 +431,33 @@ section h2 {
   margin: 0.5rem auto;
   box-sizing: border-box;
   border-radius: 4px;
+}
+
+/* Replay button: shown below video to allow re-playing */
+.replay-btn {
+  display: block;
+  margin: 0.4rem auto 0;
+  padding: 0.4rem 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.replay-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* Replay button inside the presentation image container: absolute overlay */
+.p-image-container .replay-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  margin: 0;
+  z-index: 10;
 }
 
 /* ---- Debug overlay (activate with ?debug=1) ---- */

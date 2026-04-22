@@ -4,11 +4,57 @@ const codeP = appP.dataset.code;
 const qTitle = document.getElementById('p-title');
 const qText = document.getElementById('p-question');
 const qImage = document.getElementById('p-image');
+const qVideo = document.getElementById('p-video');
+const qReplayBtn = document.getElementById('p-replay-btn');
 const qAnswers = document.getElementById('p-answers');
 const sTitle = document.getElementById('p-standings-title');
 const sList = document.getElementById('p-standings');
 const participantsOverlay = document.getElementById('participants-overlay');
 const pImageContainer = document.querySelector('.p-image-container');
+
+/** Returns true if the given file path is an MP4 video. */
+function isVideo(src) {
+  return /\.mp4$/i.test(src);
+}
+
+/**
+ * Show an image or video in the presentation media slot.
+ * Pass null/undefined to hide all media.
+ */
+function showMedia(src) {
+  if (!src) {
+    qImage.classList.add('hidden');
+    qVideo.classList.add('hidden');
+    qVideo.pause();
+    qVideo.removeAttribute('src');
+    if (qReplayBtn) qReplayBtn.classList.add('hidden');
+    return;
+  }
+  if (isVideo(src)) {
+    qImage.classList.add('hidden');
+    qVideo.src = src;
+    qVideo.classList.remove('hidden');
+    qVideo.load();
+    qVideo.play().catch(() => {});
+    if (qReplayBtn) qReplayBtn.classList.remove('hidden');
+  } else {
+    qVideo.pause();
+    qVideo.classList.add('hidden');
+    qVideo.removeAttribute('src');
+    qImage.src = src;
+    qImage.classList.remove('hidden');
+    if (qReplayBtn) qReplayBtn.classList.add('hidden');
+  }
+}
+
+if (qReplayBtn) {
+  qReplayBtn.addEventListener('click', () => {
+    if (qVideo && !qVideo.classList.contains('hidden')) {
+      qVideo.currentTime = 0;
+      qVideo.play().catch(() => {});
+    }
+  });
+}
 
 // map of nickname -> { left, top, rot, scale }
 const participantsMap = {};
@@ -79,7 +125,7 @@ function renderPresentation(data) {
     qAnswers.innerHTML = '';
     sTitle.classList.add('hidden');
     sList.innerHTML = '';
-    qImage.classList.add('hidden');
+    showMedia(null);
     return;
   }
 
@@ -97,18 +143,18 @@ function renderPresentation(data) {
     sList.innerHTML = '';
 
     if (data.currentIntroImage) {
-      qImage.src = '../' + data.currentIntroImage;
-      qImage.classList.remove('hidden');
+      showMedia('../' + data.currentIntroImage);
     } else {
-      qImage.classList.add('hidden');
+      showMedia(null);
     }
 
-    // Adjust image sizing for intro phase
+    // Adjust media sizing for intro phase
     try {
       requestAnimationFrame(() => {
         if (!pImageContainer) return;
         pImageContainer.style.maxHeight = '';
         qImage.style.maxHeight = '';
+        qVideo.style.maxHeight = '';
       });
     } catch (err) {
       console.error('Failed to adjust presentation image sizing', err);
@@ -128,15 +174,13 @@ function renderPresentation(data) {
     if (hasAnswerImages && data.phase === 'reveal') {
       const ai = data.answerImageIndex || 0;
       const answerImageToShow = data.question.answerImages[ai] || data.question.answerImages[0];
-      qImage.src = '../' + answerImageToShow;
-      qImage.classList.remove('hidden');
+      showMedia('../' + answerImageToShow);
     } else if (hasQuestionImages) {
       const qi = data.questionImageIndex || 0;
       const questionImageToShow = data.question.images[qi] || data.question.images[0];
-      qImage.src = '../' + questionImageToShow;
-      qImage.classList.remove('hidden');
+      showMedia('../' + questionImageToShow);
     } else {
-      qImage.classList.add('hidden');
+      showMedia(null);
     }
 
     qAnswers.innerHTML = '';
@@ -169,7 +213,7 @@ function renderPresentation(data) {
       // during the answers/reveal phases. No need to append them again below.
     }
 
-    // Adjust image sizing so answers fit vertically in the viewport
+    // Adjust media sizing so answers fit vertically in the viewport
     try {
       // small delay to ensure DOM rendered sizes are available
       requestAnimationFrame(() => {
@@ -183,11 +227,13 @@ function renderPresentation(data) {
           // leave at least 20vh for image if calculation fails
           const minPx = window.innerHeight * 0.2;
           pImageContainer.style.maxHeight = Math.max(minPx, maxImagePx) + 'px';
-          // ensure the image itself doesn't exceed the container
+          // ensure the media element doesn't exceed the container
           qImage.style.maxHeight = '100%';
+          qVideo.style.maxHeight = '100%';
         } else {
           pImageContainer.style.maxHeight = '';
           qImage.style.maxHeight = '';
+          qVideo.style.maxHeight = '';
         }
       });
     } catch (err) {
@@ -199,7 +245,7 @@ function renderPresentation(data) {
   } else {
     qText.textContent = '';
     qAnswers.innerHTML = '';
-    qImage.classList.add('hidden');
+    showMedia(null);
   }
 
   if (data.phase === 'standings' || data.phase === 'finished') {
@@ -213,12 +259,12 @@ function renderPresentation(data) {
       li.textContent = `${idx + 1}. ${p.nickname} – ${p.score} Punkte`;
       sList.appendChild(li);
     });
-    // Ensure the top image is hidden when showing standings
+    // Ensure the top media is hidden when showing standings
     try {
-      qImage.classList.add('hidden');
-      qImage.src = '';
+      showMedia(null);
       if (pImageContainer) pImageContainer.style.maxHeight = '';
       qImage.style.maxHeight = '';
+      qVideo.style.maxHeight = '';
     } catch (err) {
       // ignore
     }

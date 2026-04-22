@@ -2,21 +2,23 @@
 require_once __DIR__ . '/../config.php';
 $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 
-// Collect all image paths for client-side preloading
+// Collect all media paths for client-side preloading
 $questions = load_questions();
-$allImages = [];
+$allMedia = [];
 foreach ($questions['intro_images'] ?? [] as $img) {
-    $allImages[] = '../' . $img;
+    $allMedia[] = '../' . $img;
 }
 foreach ($questions['questions'] as $q) {
     foreach ($q['images'] ?? [] as $img) {
-        $allImages[] = '../' . $img;
+        $allMedia[] = '../' . $img;
     }
     foreach ($q['answer_images'] ?? [] as $img) {
-        $allImages[] = '../' . $img;
+        $allMedia[] = '../' . $img;
     }
 }
-$allImages = array_values(array_unique($allImages));
+$allMedia = array_values(array_unique($allMedia));
+// Separate images (preloadable via <link>) from videos
+$allImages = array_values(array_filter($allMedia, fn($p) => !preg_match('/\.mp4$/i', $p)));
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -71,9 +73,11 @@ $allImages = array_values(array_unique($allImages));
       justify-content: center;
       overflow: hidden;
       margin-bottom: 0.5rem;
+      position: relative;
     }
 
-    #p-image {
+    #p-image,
+    #p-video {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -81,7 +85,8 @@ $allImages = array_values(array_unique($allImages));
       border-radius: 6px;
     }
 
-    #p-image.hidden {
+    #p-image.hidden,
+    #p-video.hidden {
       display: none !important;
     }
 
@@ -133,6 +138,8 @@ $allImages = array_values(array_unique($allImages));
     <ol id="p-standings"></ol>
     <div class="p-image-container">
       <img id="p-image" class="hidden" alt="">
+      <video id="p-video" class="hidden" autoplay muted playsinline></video>
+      <button id="p-replay-btn" class="replay-btn hidden">↺ Wiederholen</button>
     </div>
     <ul id="p-answers"></ul>
   </div>
