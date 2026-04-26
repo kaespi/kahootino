@@ -460,6 +460,11 @@ section h2 {
   z-index: 10;
 }
 
+/* Ensure the hidden class always wins over display:block from .replay-btn */
+.replay-btn.hidden {
+  display: none;
+}
+
 /* ---- Debug overlay (activate with ?debug=1) ---- */
 #debug-overlay {
   position: fixed;
