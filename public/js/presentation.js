@@ -35,7 +35,6 @@ function showMedia(src) {
     qVideo.src = src;
     qVideo.muted = true;
     qVideo.classList.remove('hidden');
-    qVideo.load();
     qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
     if (qReplayBtn) qReplayBtn.classList.remove('hidden');
   } else {
