@@ -33,9 +33,10 @@ function showMedia(src) {
   if (isVideo(src)) {
     qImage.classList.add('hidden');
     qVideo.src = src;
+    qVideo.muted = true;
     qVideo.classList.remove('hidden');
     qVideo.load();
-    qVideo.play().catch(() => {});
+    qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
     if (qReplayBtn) qReplayBtn.classList.remove('hidden');
   } else {
     qVideo.pause();
@@ -51,7 +52,8 @@ if (qReplayBtn) {
   qReplayBtn.addEventListener('click', () => {
     if (qVideo && !qVideo.classList.contains('hidden')) {
       qVideo.currentTime = 0;
-      qVideo.play().catch(() => {});
+      qVideo.muted = true;
+      qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
     }
   });
 }

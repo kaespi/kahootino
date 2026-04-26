@@ -142,7 +142,7 @@ $allVideos = array_values(array_filter($allMedia, fn($p) =>  preg_match('/\.mp4$
     <ol id="p-standings"></ol>
     <div class="p-image-container">
       <img id="p-image" class="hidden" alt="">
-      <video id="p-video" class="hidden" autoplay playsinline></video>
+      <video id="p-video" class="hidden" autoplay muted playsinline></video>
       <button id="p-replay-btn" class="replay-btn hidden">↺ Wiederholen</button>
     </div>
     <ul id="p-answers"></ul>
