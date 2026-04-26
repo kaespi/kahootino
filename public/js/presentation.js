@@ -5,7 +5,6 @@ const qTitle = document.getElementById('p-title');
 const qText = document.getElementById('p-question');
 const qImage = document.getElementById('p-image');
 const qVideo = document.getElementById('p-video');
-const qReplayBtn = document.getElementById('p-replay-btn');
 const qAnswers = document.getElementById('p-answers');
 const sTitle = document.getElementById('p-standings-title');
 const sList = document.getElementById('p-standings');
@@ -27,7 +26,6 @@ function showMedia(src) {
     qVideo.classList.add('hidden');
     qVideo.pause();
     qVideo.removeAttribute('src');
-    if (qReplayBtn) qReplayBtn.classList.add('hidden');
     return;
   }
   if (isVideo(src)) {
@@ -37,25 +35,13 @@ function showMedia(src) {
     qVideo.src = src;
     qVideo.load();
     qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
-    if (qReplayBtn) qReplayBtn.classList.remove('hidden');
   } else {
     qVideo.pause();
     qVideo.classList.add('hidden');
     qVideo.removeAttribute('src');
     qImage.src = src;
     qImage.classList.remove('hidden');
-    if (qReplayBtn) qReplayBtn.classList.add('hidden');
   }
-}
-
-if (qReplayBtn) {
-  qReplayBtn.addEventListener('click', () => {
-    if (qVideo && !qVideo.classList.contains('hidden')) {
-      qVideo.currentTime = 0;
-      qVideo.muted = true;
-      qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
-    }
-  });
 }
 
 // One-time activation overlay: clicking it gives the page user-gesture activation so
@@ -113,13 +99,11 @@ function startAbly() {
       console.error('Failed to handle presentation join message', err);
     }
   });
-  // subscribe to host-triggered video control commands
+  // subscribe to host-triggered video replay command
   channel.subscribe('control', (msg) => {
     const action = msg.data && msg.data.action;
     if (!qVideo || qVideo.classList.contains('hidden')) return;
-    if (action === 'play') {
-      qVideo.play().catch(() => {});
-    } else if (action === 'replay') {
+    if (action === 'replay') {
       qVideo.currentTime = 0;
       qVideo.play().catch(() => {});
     }

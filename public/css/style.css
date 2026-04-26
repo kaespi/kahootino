@@ -433,38 +433,6 @@ section h2 {
   border-radius: 4px;
 }
 
-/* Replay button: shown below video to allow re-playing */
-.replay-btn {
-  display: block;
-  margin: 0.4rem auto 0;
-  padding: 0.4rem 1rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.replay-btn:hover {
-  background: rgba(0, 0, 0, 0.85);
-}
-
-/* Replay button inside the presentation image container: absolute overlay */
-.p-image-container .replay-btn {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  margin: 0;
-  z-index: 10;
-}
-
-/* Ensure the hidden class always wins over display:block from .replay-btn */
-.replay-btn.hidden {
-  display: none;
-}
-
 /* Activation overlay on presentation: one-time tap to unlock unmuted audio in Firefox */
 #activation-overlay {
   position: fixed;

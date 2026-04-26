@@ -72,7 +72,6 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
       <div id="video-controls-group" class="image-nav-group hidden">
         <h3>Video-Steuerung</h3>
         <div class="image-nav-controls">
-          <button id="play-video-btn" data-action="play_video" class="image-nav-btn">▶ Abspielen</button>
           <button id="replay-video-btn" data-action="replay_video" class="image-nav-btn">↺ Nochmal</button>
         </div>
       </div>
