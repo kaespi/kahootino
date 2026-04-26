@@ -406,22 +406,24 @@ section h2 {
   }
 }
 
-/* Player: scale and center question images responsively
-   - shrink images that are wider than the viewport to avoid horizontal scrolling
-   - keep smaller images at their natural size and center them
-   - ensure image keeps aspect ratio when device rotates */
-.player #question-image {
+/* Player: scale and center question images/videos responsively
+   - shrink media that is wider than the viewport to avoid horizontal scrolling
+   - keep smaller media at their natural size and center it
+   - ensure media keeps aspect ratio when device rotates */
+.player #question-image,
+.player #question-video {
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 0.5rem auto; /* center smaller images and add small vertical gap */
+  margin: 0.5rem auto; /* center smaller media and add small vertical gap */
   box-sizing: border-box;
-  /* prevent the image from causing horizontal overflow */
+  /* prevent the media from causing horizontal overflow */
   max-width: calc(100vw - 2rem);
 }
 
-/* Answer image shown during reveal phase: behave like question image and center */
-.player .answer-image img {
+/* Answer image/video shown during reveal phase: behave like question media and center */
+.player .answer-image img,
+.player .answer-image video {
   display: block;
   width: auto;
   max-width: calc(100vw - 2rem);
@@ -429,6 +431,42 @@ section h2 {
   margin: 0.5rem auto;
   box-sizing: border-box;
   border-radius: 4px;
+}
+
+/* Activation overlay on presentation: one-time tap to unlock unmuted audio in Firefox */
+#activation-overlay {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 200;
+}
+
+#activation-btn {
+  padding: 0.55rem 1rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#activation-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+}
+
+#activation-overlay.hidden {
+  display: none;
+}
+
+/* Video play/replay buttons in host image-nav section */
+#video-controls-group .image-nav-btn {
+  background: #6f42c1;
+}
+
+#video-controls-group .image-nav-btn:hover {
+  background: #59359a;
 }
 
 /* ---- Debug overlay (activate with ?debug=1) ---- */

@@ -17,7 +17,7 @@
     },
     "intro_images": {
       "type": "array",
-      "description": "Optional array of image file paths or URLs to display during the introductory phase before players join (shown in presentation mode).",
+      "description": "Optional array of image file paths (JPEG, PNG, etc.) or MP4 video paths to display during the introductory phase before players join (shown in presentation mode). Videos auto-play when displayed.",
       "items": { "type": "string" }
     },
     "questions": {
@@ -36,7 +36,7 @@
           },
           "images": {
             "type": "array",
-            "description": "Optional array of image file paths or URLs associated with the question (shown in presentation mode).",
+            "description": "Optional array of image file paths (JPEG, PNG, etc.) or MP4 video paths associated with the question (shown in presentation mode). Videos auto-play when displayed.",
             "items": { "type": "string" }
           },
           "showImagesToPlayers": {
@@ -52,7 +52,7 @@
           },
           "answer_images": {
             "type": "array",
-            "description": "Optional array of image file paths or URLs used to illustrate answers (one or more items, shown in presentation mode).",
+            "description": "Optional array of image file paths (JPEG, PNG, etc.) or MP4 video paths used to illustrate answers (one or more items, shown in presentation mode and player reveal phase). Videos auto-play when displayed.",
             "items": { "type": "string" }
           },
           "correctIndex": {
