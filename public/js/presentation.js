@@ -35,6 +35,7 @@ function showMedia(src) {
     qVideo.classList.remove('hidden');
     qVideo.muted = true;
     qVideo.src = src;
+    qVideo.load();
     qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
     if (qReplayBtn) qReplayBtn.classList.remove('hidden');
   } else {
@@ -55,6 +56,19 @@ if (qReplayBtn) {
       qVideo.play().then(() => { qVideo.muted = false; }).catch(() => {});
     }
   });
+}
+
+// One-time activation overlay: clicking it gives the page user-gesture activation so
+// Firefox allows unmuted audio on subsequent play() calls.
+const activationOverlay = document.getElementById('activation-overlay');
+if (activationOverlay) {
+  activationOverlay.addEventListener('click', () => {
+    activationOverlay.classList.add('hidden');
+    // Unmute any video that is already playing
+    if (qVideo && !qVideo.classList.contains('hidden') && qVideo.src) {
+      qVideo.muted = false;
+    }
+  }, { once: true });
 }
 
 // map of nickname -> { left, top, rot, scale }
@@ -97,6 +111,17 @@ function startAbly() {
       handleJoin(msg.data);
     } catch (err) {
       console.error('Failed to handle presentation join message', err);
+    }
+  });
+  // subscribe to host-triggered video control commands
+  channel.subscribe('control', (msg) => {
+    const action = msg.data && msg.data.action;
+    if (!qVideo || qVideo.classList.contains('hidden')) return;
+    if (action === 'play') {
+      qVideo.play().catch(() => {});
+    } else if (action === 'replay') {
+      qVideo.currentTime = 0;
+      qVideo.play().catch(() => {});
     }
   });
 }

@@ -338,6 +338,16 @@ switch ($action) {
         json_response(['status' => 'ok', 'imageIndex' => (int)$quiz['intro_image_index']]);
         break;
 
+    case 'play_video':
+        ably_publish("quiz-$code", "control", ['action' => 'play']);
+        json_response(['status' => 'ok']);
+        break;
+
+    case 'replay_video':
+        ably_publish("quiz-$code", "control", ['action' => 'replay']);
+        json_response(['status' => 'ok']);
+        break;
+
     default:
         json_response(['error' => 'Unknown action'], 400);
 }

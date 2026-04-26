@@ -150,6 +150,10 @@ $allVideos = array_values(array_filter($allMedia, fn($p) =>  preg_match('/\.mp4$
 
   <div id="participants-overlay"></div>
 
+  <div id="activation-overlay">
+    <button id="activation-btn">🔊 Ton aktivieren</button>
+  </div>
+
   <script>
     window.KAHOOTINO_IMAGES = <?php echo json_encode($allImages, JSON_UNESCAPED_SLASHES); ?>;
     window.KAHOOTINO_VIDEOS = <?php echo json_encode($allVideos, JSON_UNESCAPED_SLASHES); ?>;

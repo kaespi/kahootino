@@ -465,6 +465,42 @@ section h2 {
   display: none;
 }
 
+/* Activation overlay on presentation: one-time tap to unlock unmuted audio in Firefox */
+#activation-overlay {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 200;
+}
+
+#activation-btn {
+  padding: 0.55rem 1rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#activation-btn:hover {
+  background: rgba(0, 0, 0, 0.92);
+}
+
+#activation-overlay.hidden {
+  display: none;
+}
+
+/* Video play/replay buttons in host image-nav section */
+#video-controls-group .image-nav-btn {
+  background: #6f42c1;
+}
+
+#video-controls-group .image-nav-btn:hover {
+  background: #59359a;
+}
+
 /* ---- Debug overlay (activate with ?debug=1) ---- */
 #debug-overlay {
   position: fixed;

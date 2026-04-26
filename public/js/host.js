@@ -26,6 +26,11 @@ let countdownInterval = null;
 let countdownEndTime = null;
 let participants = [];
 
+/** Returns true when the given file path is an MP4 video. */
+function isVideo(src) {
+  return src && /\.mp4$/i.test(src);
+}
+
 // Fetch questions on load
 async function loadQuestions() {
   try {
@@ -107,6 +112,7 @@ function handleStateUpdate(data) {
 
   // Update image navigation UI
   updateImageNavigationUI();
+  updateVideoControlsUI();
 
   // Handle countdown display
   if (data.phase === 'answers' && data.questionEndTime) {
@@ -162,6 +168,37 @@ function renderStandings(list) {
     li.textContent = `${p.nickname} – ${p.score} Punkte`;
     standingsList.appendChild(li);
   });
+}
+
+// Show/hide the video play/replay controls based on whether the current media is a video
+function updateVideoControlsUI() {
+  const videoGroup = document.getElementById('video-controls-group');
+  if (!videoGroup) return;
+
+  let show = false;
+  if (currentPhase === 'intro') {
+    show = isVideo(introImages[currentIntroImageIndex]);
+  } else if ((currentPhase === 'question' || currentPhase === 'answers') &&
+             currentQuestionIndex >= 0 && currentQuestionIndex < questions.length) {
+    const q = questions[currentQuestionIndex];
+    const images = q.images || [];
+    show = isVideo(images[currentQuestionImageIndex]);
+  } else if (currentPhase === 'reveal' &&
+             currentQuestionIndex >= 0 && currentQuestionIndex < questions.length) {
+    const q = questions[currentQuestionIndex];
+    const answerImages = q.answer_images || [];
+    if (answerImages.length > 0) {
+      show = isVideo(answerImages[currentAnswerImageIndex]);
+    } else {
+      show = isVideo((q.images || [])[currentQuestionImageIndex]);
+    }
+  }
+
+  // Also make the parent section visible when there are video controls to show
+  if (show) {
+    imageNavSection.classList.remove('hidden');
+  }
+  videoGroup.classList.toggle('hidden', !show);
 }
 
 // Update image navigation UI visibility and button states
