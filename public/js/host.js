@@ -217,11 +217,16 @@ function updateButtonStates() {
     ? questions[currentQuestionIndex]
     : null;
   const questionImages = q ? (q.images || []) : [];
+  const answerImages = q ? (q.answer_images || []) : [];
 
   const atLastIntroImage = introImages.length === 0 ||
     currentIntroImageIndex === introImages.length - 1;
   const atLastQuestionImage = questionImages.length === 0 ||
     currentQuestionImageIndex === questionImages.length - 1;
+  // During reveal: gate on answer images if present, otherwise on question images
+  const atLastRevealImage = answerImages.length > 0
+    ? currentAnswerImageIndex === answerImages.length - 1
+    : atLastQuestionImage;
   const hasMoreQuestions = currentQuestionIndex + 1 < questions.length;
 
   // Intro controls
@@ -230,11 +235,11 @@ function updateButtonStates() {
 
   // Main sequence buttons
   setButtonEnabled('show_question',
-    (currentPhase === 'waiting' || currentPhase === 'standings' || currentPhase === 'reveal') &&
-    hasMoreQuestions);
+    ((currentPhase === 'waiting' || currentPhase === 'standings') && hasMoreQuestions) ||
+    (currentPhase === 'reveal' && atLastRevealImage && hasMoreQuestions));
   setButtonEnabled('show_answers', currentPhase === 'question' && atLastQuestionImage);
   setButtonEnabled('reveal', currentPhase === 'answers');
-  setButtonEnabled('show_standings', currentPhase === 'reveal');
+  setButtonEnabled('show_standings', currentPhase === 'reveal' && atLastRevealImage);
 }
 
 // Update image navigation UI visibility and button states
