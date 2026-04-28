@@ -143,6 +143,22 @@ button {
   background: #0056b3;
 }
 
+#host-controls button:disabled,
+#host-controls button.disabled,
+#intro-controls button:disabled,
+#intro-controls button.disabled {
+  background: #aaa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+#host-controls button:disabled:hover,
+#host-controls button.disabled:hover,
+#intro-controls button:disabled:hover,
+#intro-controls button.disabled:hover {
+  background: #aaa;
+}
+
 #host-controls2 {
   margin: 2rem 0;
   padding: 1rem;

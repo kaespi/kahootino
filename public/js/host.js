@@ -135,6 +135,8 @@ function handleStateUpdate(data) {
   } else {
     standingsSection.classList.add('hidden');
   }
+
+  updateButtonStates();
 }
 
 function startCountdown(initialSeconds) {
@@ -199,6 +201,45 @@ function updateVideoControlsUI() {
     imageNavSection.classList.remove('hidden');
   }
   videoGroup.classList.toggle('hidden', !show);
+}
+
+// Enable or disable a button by its data-action attribute
+function setButtonEnabled(action, enabled) {
+  const btn = document.querySelector(`button[data-action="${action}"]`);
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.classList.toggle('disabled', !enabled);
+}
+
+// Update which host action buttons are enabled based on the current phase and image indices
+function updateButtonStates() {
+  const q = (currentQuestionIndex >= 0 && currentQuestionIndex < questions.length)
+    ? questions[currentQuestionIndex]
+    : null;
+  const questionImages = q ? (q.images || []) : [];
+  const answerImages = q ? (q.answer_images || []) : [];
+
+  const atLastIntroImage = introImages.length === 0 ||
+    currentIntroImageIndex === introImages.length - 1;
+  const atLastQuestionImage = questionImages.length === 0 ||
+    currentQuestionImageIndex === questionImages.length - 1;
+  // During reveal: gate on answer images if present, otherwise on question images
+  const atLastRevealImage = answerImages.length > 0
+    ? currentAnswerImageIndex === answerImages.length - 1
+    : atLastQuestionImage;
+  const hasMoreQuestions = currentQuestionIndex + 1 < questions.length;
+
+  // Intro controls
+  setButtonEnabled('start_intro', currentPhase === 'intro');
+  setButtonEnabled('open_for_joining', currentPhase === 'intro' && atLastIntroImage);
+
+  // Main sequence buttons
+  setButtonEnabled('show_question',
+    ((currentPhase === 'waiting' || currentPhase === 'standings') && hasMoreQuestions) ||
+    (currentPhase === 'reveal' && atLastRevealImage && hasMoreQuestions));
+  setButtonEnabled('show_answers', currentPhase === 'question' && atLastQuestionImage);
+  setButtonEnabled('reveal', currentPhase === 'answers');
+  setButtonEnabled('show_standings', currentPhase === 'reveal' && atLastRevealImage);
 }
 
 // Update image navigation UI visibility and button states
@@ -400,6 +441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await loadQuestions();
+  updateButtonStates();
   await fetchInitialState();
   startAbly();
 });
