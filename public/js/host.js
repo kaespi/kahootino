@@ -138,7 +138,7 @@ function handleStateUpdate(data) {
   console.log('Updated currentQuestionIndex to:', currentQuestionIndex);
   console.log('Updated image indices - question:', currentQuestionImageIndex, 'answer:', currentAnswerImageIndex, 'intro:', currentIntroImageIndex);
 
-  if (currentPhase === 'intro' && previousPhase !== 'intro') {
+  if (currentPhase === 'intro' && previousPhase !== null && previousPhase !== 'intro') {
     clearParticipants();
   } else if (currentPhase === 'waiting' && previousPhase !== 'waiting') {
     fetchPlayers();

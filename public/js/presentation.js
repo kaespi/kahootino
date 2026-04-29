@@ -146,7 +146,7 @@ function renderPresentation(data) {
   const previousPhase = currentPhase;
   currentPhase = data.phase;
 
-  if (currentPhase === 'intro' && previousPhase !== 'intro') {
+  if (currentPhase === 'intro' && previousPhase !== null && previousPhase !== 'intro') {
     clearParticipants();
   } else if (currentPhase === 'waiting' && previousPhase !== 'waiting') {
     fetchPlayers();
@@ -417,5 +417,4 @@ function showParticipantsOverlay(show) {
 
 // Initialize state and participants on load
 fetchInitialState();
-fetchPlayers();
 startAbly();
