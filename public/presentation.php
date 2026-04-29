@@ -62,12 +62,12 @@ $allVideos = array_values(array_filter($allMedia, fn($p) =>  preg_match('/\.mp4$
     #p-title {
       margin: 0 0 0.25rem 0;
       padding: 0;
-      font-size: 1.6rem;
+      font-size: 1.2rem;
     }
 
     #p-question {
       margin: 0 0 0.5rem 0;
-      font-size: 1.25rem;
+      font-size: 1.6rem;
     }
 
     .p-image-container {

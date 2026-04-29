@@ -205,6 +205,7 @@ function renderPresentation(data) {
         if ((data.phase === 'reveal') && data.question.correctIndex === idx) {
             li.style.color = 'yellow';
             li.style.fontWeight = 'bold';
+            li.style.fontSize = '2.5rem';
         }
 
         if (data.phase === 'reveal') {
