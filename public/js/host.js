@@ -25,6 +25,38 @@ let currentIntroImageIndex = 0;
 let countdownInterval = null;
 let countdownEndTime = null;
 let participants = [];
+let wakeLock = null;
+let quizFinished = false;
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        wakeLock = null;
+      });
+    } catch (err) {
+      console.warn('Wake lock request failed:', err.message);
+    }
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock !== null) {
+    try {
+      await wakeLock.release();
+    } catch (err) {
+      console.warn('Wake lock release failed:', err.message);
+    }
+    wakeLock = null;
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && wakeLock === null && !quizFinished) {
+    requestWakeLock();
+  }
+});
 
 /** Returns true when the given file path is an MP4 video. */
 function isVideo(src) {
@@ -134,6 +166,11 @@ function handleStateUpdate(data) {
     standingsSection.classList.remove('hidden');
   } else {
     standingsSection.classList.add('hidden');
+  }
+
+  if (data.phase === 'finished') {
+    quizFinished = true;
+    releaseWakeLock();
   }
 
   updateButtonStates();
@@ -443,5 +480,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadQuestions();
   updateButtonStates();
   await fetchInitialState();
+  requestWakeLock();
   startAbly();
 });
