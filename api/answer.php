@@ -45,13 +45,6 @@ if (!$playerId) {
     timed_json_response(['error' => 'Spieler nicht gefunden'], 404);
 }
 
-// prevent double answer (fast existence check)
-$stmt = db()->prepare("SELECT id FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
-$stmt->execute([$quiz['id'], $playerId, $questionIndex]);
-if ($stmt->fetchColumn()) {
-    timed_json_response(['error' => 'Bereits beantwortet'], 400);
-}
-
 $questions = load_questions();
 if (!isset($questions['questions'][$questionIndex])) {
     timed_json_response(['error' => 'Ungültiger Fragenindex'], 400);
@@ -89,6 +82,13 @@ try {
     }
 
     db()->commit();
+} catch (PDOException $e) {
+    db()->rollBack();
+    // MySQL duplicate key = SQLSTATE 23000
+    if ($e->getCode() === '23000') {
+        timed_json_response(['error' => 'Bereits beantwortet'], 400);
+    }
+    timed_json_response(['error' => 'Antwort konnte nicht gespeichert werden'], 500);
 } catch (Exception $e) {
     db()->rollBack();
     timed_json_response(['error' => 'Antwort konnte nicht gespeichert werden'], 500);
