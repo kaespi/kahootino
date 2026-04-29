@@ -28,6 +28,11 @@ let participants = [];
 let wakeLock = null;
 let quizFinished = false;
 
+function clearParticipants() {
+  participants = [];
+  renderParticipants();
+}
+
 async function requestWakeLock() {
   if ('wakeLock' in navigator) {
     try {
@@ -109,6 +114,7 @@ async function hostAction(action) {
 
 // Handle real-time state updates
 function handleStateUpdate(data) {
+  const previousPhase = currentPhase;
   // --- Lag diagnostics ---
   const receiveTime = Date.now();
   if (data.publishedAt) {
@@ -131,6 +137,12 @@ function handleStateUpdate(data) {
   currentIntroImageIndex = data.introImageIndex !== undefined ? data.introImageIndex : 0;
   console.log('Updated currentQuestionIndex to:', currentQuestionIndex);
   console.log('Updated image indices - question:', currentQuestionImageIndex, 'answer:', currentAnswerImageIndex, 'intro:', currentIntroImageIndex);
+
+  if (data.phase === 'intro' && previousPhase !== 'intro') {
+    clearParticipants();
+  } else if (data.phase === 'waiting' && previousPhase !== 'waiting') {
+    fetchPlayers();
+  }
 
   // Update question highlighting
   renderQuestionsList();

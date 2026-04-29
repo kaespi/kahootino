@@ -60,6 +60,13 @@ if (activationOverlay) {
 // map of nickname -> { left, top, rot, scale }
 const participantsMap = {};
 const participantsOrder = []; // preserve insertion order
+let currentPhase = null;
+
+function clearParticipants() {
+  participantsOrder.splice(0, participantsOrder.length);
+  Object.keys(participantsMap).forEach((nick) => delete participantsMap[nick]);
+  renderParticipants();
+}
 
 function startSSEP() {
   const url = '../api/state_sse.php?code=' + encodeURIComponent(codeP);
@@ -77,40 +84,74 @@ function startSSEP() {
 
 function startAbly() {
   const ablyKey = appP.dataset.ablyKey;
-  const client = new Ably.Realtime(ablyKey);
-  const channel = client.channels.get('quiz-' + codeP);
+  if (!ablyKey) {
+    console.log('No Ably key, falling back to SSE');
+    startSSEP();
+    return;
+  }
 
-  // --- Ably connection diagnostics ---
-  client.connection.on(function(stateChange) {
-    console.log('[LAG] Ably connection: ' + stateChange.previous + ' → ' + stateChange.current +
-      (stateChange.reason ? ' (' + stateChange.reason.message + ')' : ''));
-  });
-  // --- end diagnostics ---
+  try {
+    const client = new Ably.Realtime(ablyKey);
+    const channel = client.channels.get('quiz-' + codeP);
 
-  channel.subscribe('state', (msg) => {
-    const data = msg.data;
+    // --- Ably connection diagnostics ---
+    client.connection.on(function(stateChange) {
+      console.log('[LAG] Ably connection: ' + stateChange.previous + ' → ' + stateChange.current +
+        (stateChange.reason ? ' (' + stateChange.reason.message + ')' : ''));
+    });
+    // --- end diagnostics ---
+
+    channel.subscribe('state', (msg) => {
+      const data = msg.data;
+      renderPresentation(data);
+    });
+    // subscribe to join notifications
+    channel.subscribe('join', (msg) => {
+      try {
+        handleJoin(msg.data);
+      } catch (err) {
+        console.error('Failed to handle presentation join message', err);
+      }
+    });
+    // subscribe to host-triggered video replay command
+    channel.subscribe('control', (msg) => {
+      const action = msg.data && msg.data.action;
+      if (!qVideo || qVideo.classList.contains('hidden')) return;
+      if (action === 'replay') {
+        qVideo.currentTime = 0;
+        qVideo.play().catch(() => {});
+      }
+    });
+  } catch (err) {
+    console.error('Ably failed, falling back to SSE:', err);
+    startSSEP();
+  }
+}
+
+async function fetchInitialState() {
+  try {
+    const res = await fetch('../api/state.php?code=' + encodeURIComponent(codeP));
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      console.error('Failed to fetch presentation state:', data.error || res.status);
+      return;
+    }
     renderPresentation(data);
-  });
-  // subscribe to join notifications
-  channel.subscribe('join', (msg) => {
-    try {
-      handleJoin(msg.data);
-    } catch (err) {
-      console.error('Failed to handle presentation join message', err);
-    }
-  });
-  // subscribe to host-triggered video replay command
-  channel.subscribe('control', (msg) => {
-    const action = msg.data && msg.data.action;
-    if (!qVideo || qVideo.classList.contains('hidden')) return;
-    if (action === 'replay') {
-      qVideo.currentTime = 0;
-      qVideo.play().catch(() => {});
-    }
-  });
+  } catch (err) {
+    console.error('Error fetching presentation state:', err);
+  }
 }
 
 function renderPresentation(data) {
+  const previousPhase = currentPhase;
+  currentPhase = data.phase;
+
+  if (currentPhase === 'intro' && previousPhase !== 'intro') {
+    clearParticipants();
+  } else if (currentPhase === 'waiting' && previousPhase !== 'waiting') {
+    fetchPlayers();
+  }
+
   // --- Lag diagnostics ---
   const receiveTime = Date.now();
   if (data.publishedAt) {
@@ -285,8 +326,6 @@ function renderPresentation(data) {
   }
 }
 
-startAbly();
-
 // Keep Image objects alive in a persistent array so the browser retains them in memory cache
 const _preloadedImages = (window.KAHOOTINO_IMAGES || []).map(src => {
   const img = new Image();
@@ -376,5 +415,7 @@ function showParticipantsOverlay(show) {
   }
 }
 
-// Initialize participants on load
+// Initialize state and participants on load
+fetchInitialState();
 fetchPlayers();
+startAbly();
