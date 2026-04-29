@@ -47,9 +47,19 @@ function load_questions() {
 }
 
 function get_quiz_by_code($code) {
+    if (function_exists('apcu_fetch')) {
+        $quiz = apcu_fetch("kahootino_quiz_$code", $success);
+        if ($success) return $quiz;
+    }
     $stmt = db()->prepare("SELECT * FROM quiz WHERE code = ?");
     $stmt->execute([$code]);
-    return $stmt->fetch();
+    $quiz = $stmt->fetch();
+    if ($quiz && function_exists('apcu_store')) {
+        // Cache for 1 second — short enough that host actions feel instant,
+        // long enough to absorb repeated polls from SSE clients (200 ms interval).
+        apcu_store("kahootino_quiz_$code", $quiz, 1);
+    }
+    return $quiz;
 }
 
 function json_response($data, $status = 200) {
@@ -115,16 +125,24 @@ function build_state_array($quiz, $token = null) {
     $selectedAnswerIndex = null;
 
     if ($token) {
-        $stmt = db()->prepare("SELECT * FROM player WHERE quiz_id = ? AND cookie_token = ?");
-        $stmt->execute([$quiz['id'], $token]);
+        // Fetch player and their answer for the current question in a single query.
+        // The LEFT JOIN means chosen_option is NULL when no answer exists yet.
+        $stmt = db()->prepare("
+            SELECT p.id, p.nickname, p.score,
+                   a.chosen_option
+            FROM player p
+            LEFT JOIN answer a
+              ON a.player_id     = p.id
+             AND a.quiz_id       = p.quiz_id
+             AND a.question_index = ?
+            WHERE p.quiz_id = ? AND p.cookie_token = ?
+        ");
+        $stmt->execute([$currentIndex, $quiz['id'], $token]);
         $player = $stmt->fetch();
 
-        if ($player && $currentIndex >= 0) {
-            $stmt = db()->prepare("SELECT chosen_option FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
-            $stmt->execute([$quiz['id'], $player['id'], $currentIndex]);
-            $answerRow = $stmt->fetch();
-            $hasAnswered = (bool)$answerRow;
-            $selectedAnswerIndex = $hasAnswered ? (int)$answerRow['chosen_option'] : null;
+        if ($player) {
+            $hasAnswered = $player['chosen_option'] !== null;
+            $selectedAnswerIndex = $hasAnswered ? (int)$player['chosen_option'] : null;
         }
     }
 
