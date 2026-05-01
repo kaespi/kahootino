@@ -120,7 +120,7 @@ $allVideos = array_values(array_filter($allMedia, fn($p) =>  preg_match('/\.mp4$
     .participant-badge {
       position: absolute;
       display: inline-block;
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,218,171,0.95);
       color: #222;
       padding: 10px 14px;
       font-size: 1.1rem;
