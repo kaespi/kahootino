@@ -325,7 +325,7 @@ switch ($action) {
         $introImages = $questions['intro_images'] ?? [];
         $currentImageIndex = (int)$quiz['intro_image_index'];
 
-        if ($currentImageIndex < count($introImages) - 1) {
+        if ($currentImageIndex < count($introImages) - 2) {
             $newIndex = $currentImageIndex + 1;
             $stmt = db()->prepare("UPDATE quiz SET intro_image_index = ? WHERE id = ?");
             $stmt->execute([$newIndex, $quiz['id']]);
@@ -346,3 +346,4 @@ switch ($action) {
     default:
         json_response(['error' => 'Unknown action'], 400);
 }
+

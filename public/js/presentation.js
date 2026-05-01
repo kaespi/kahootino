@@ -129,13 +129,15 @@ function renderPresentation(data) {
   // Show participants only during waiting phase
   if (data.phase === 'waiting') {
     showParticipantsOverlay(true);
-    const title = data.quizTitle || window.KAHOOTINO_TITLE || 'Kahootino Quiz';
-    qTitle.textContent = title;
+    showMedia(data.joiningImage ? '../' + data.joiningImage : null);
+    qTitle.textContent = '';
     qText.textContent = '';
     qAnswers.innerHTML = '';
     sTitle.classList.add('hidden');
     sList.innerHTML = '';
-    showMedia(null);
+    requestAnimationFrame(() => {
+      if (pImageContainer) pImageContainer.style.maxHeight = '60vh';
+    });
     return;
   }
 
@@ -329,12 +331,9 @@ function handleJoin(data) {
 function ensureParticipant(nick) {
   if (!nick) return;
   if (participantsMap[nick]) return;
-  // Assign a stable random position and style properties on first sight
-  const left = Math.random() * 90 + 5; // 5% - 95%
-  const top = Math.random() * 80 + 10; // 10% - 90% (avoid very top)
-  const rot = (Math.random() * 20) - 10;
-  const scale = 0.95 + Math.random() * 0.25;
-  participantsMap[nick] = { left, top, rot, scale };
+  // Assign a random position; forbidden-zone avoidance happens at render time
+  // when the image is actually laid out and getBoundingClientRect() is reliable.
+  participantsMap[nick] = randomBadgePos();
   participantsOrder.push(nick);
   // limit total stored participants to avoid memory growth
   const maxStored = 1000;
@@ -344,15 +343,59 @@ function ensureParticipant(nick) {
   }
 }
 
+/** Returns a random {left, top, rot, scale}, avoiding forbiddenZone if supplied. */
+function randomBadgePos(forbiddenZone) {
+  let left, top;
+  const maxAttempts = 50;
+  for (let i = 0; i < maxAttempts; i++) {
+    left = Math.random() * 90 + 5;  // 5% - 95%
+    top  = Math.random() * 80 + 10; // 10% - 90%
+    if (!forbiddenZone ||
+        left < forbiddenZone.left || left > forbiddenZone.right ||
+        top  < forbiddenZone.top  || top  > forbiddenZone.bottom) {
+      break;
+    }
+  }
+  return { left, top, rot: (Math.random() * 20) - 10, scale: 0.95 + Math.random() * 0.25 };
+}
+
+/**
+ * Returns the bounding box of the visible image in viewport-percentage coords
+ * (with a small margin), or null if no image is shown.
+ */
+function getForbiddenZone() {
+  if (!qImage || qImage.classList.contains('hidden') || !qImage.src) return null;
+  const rect = qImage.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const m = 3; // percentage-point margin
+  return {
+    left:   (rect.left   / vw) * 100 - m,
+    top:    (rect.top    / vh) * 100 - m,
+    right:  (rect.right  / vw) * 100 + m,
+    bottom: (rect.bottom / vh) * 100 + m,
+  };
+}
+
 function renderParticipants() {
   if (!participantsOverlay) return;
   const max = 200;
+  const forbiddenZone = getForbiddenZone();
   participantsOverlay.innerHTML = '';
   // render in insertion order, but cap to last `max` entries
   const toRender = participantsOrder.slice(-max);
   toRender.forEach(nick => {
-    const props = participantsMap[nick];
+    let props = participantsMap[nick];
     if (!props) return;
+    // If this badge sits over the image, move it somewhere safe and store the fix.
+    if (forbiddenZone &&
+        props.left >= forbiddenZone.left && props.left <= forbiddenZone.right &&
+        props.top  >= forbiddenZone.top  && props.top  <= forbiddenZone.bottom) {
+      const newPos = randomBadgePos(forbiddenZone);
+      props = { left: newPos.left, top: newPos.top, rot: props.rot, scale: props.scale };
+      participantsMap[nick] = props;
+    }
     const el = document.createElement('div');
     el.className = 'participant-badge';
     el.textContent = nick;

@@ -256,8 +256,9 @@ function updateButtonStates() {
   const questionImages = q ? (q.images || []) : [];
   const answerImages = q ? (q.answer_images || []) : [];
 
-  const atLastIntroImage = introImages.length === 0 ||
-    currentIntroImageIndex === introImages.length - 1;
+  const visibleIntroCount = Math.max(0, introImages.length - 1);
+  const atLastIntroImage = visibleIntroCount === 0 ||
+    currentIntroImageIndex === visibleIntroCount - 1;
   const atLastQuestionImage = questionImages.length === 0 ||
     currentQuestionImageIndex === questionImages.length - 1;
   // During reveal: gate on answer images if present, otherwise on question images
@@ -284,12 +285,15 @@ function updateImageNavigationUI() {
   // Show the intro image navigation during intro phase
   if (currentPhase === 'intro') {
     imageNavSection.classList.remove('hidden');
-    introImageNav.classList.remove('hidden');
     questionImageNav.classList.add('hidden');
     answerImageNav.classList.add('hidden');
-    
-    if (introImages.length > 0) {
-      updateImageNavButtons('intro', currentIntroImageIndex, introImages.length);
+
+    const visibleIntroCount = Math.max(0, introImages.length - 1);
+    if (visibleIntroCount > 0) {
+      introImageNav.classList.remove('hidden');
+      updateImageNavButtons('intro', currentIntroImageIndex, visibleIntroCount);
+    } else {
+      introImageNav.classList.add('hidden');
     }
     return;
   }

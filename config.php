@@ -71,11 +71,12 @@ function build_state_array($quiz, $token = null) {
     $introImageIndex = (int)$quiz['intro_image_index'];
     $currentIntroImage = null;
 
-    // Handle intro images
+    // Handle intro images — the last image is reserved for the joining/waiting phase
     if ($quiz['phase'] === 'intro') {
-        if ($introImageIndex >= 0 && $introImageIndex < count($introImages)) {
+        $visibleIntroCount = max(0, count($introImages) - 1);
+        if ($visibleIntroCount > 0 && $introImageIndex >= 0 && $introImageIndex < $visibleIntroCount) {
             $currentIntroImage = $introImages[$introImageIndex];
-        } else if (count($introImages) > 0) {
+        } else if ($visibleIntroCount > 0) {
             $currentIntroImage = $introImages[0];
         }
     }
@@ -135,6 +136,11 @@ function build_state_array($quiz, $token = null) {
         $standings = $stmt->fetchAll();
     }
 
+    // The last intro image is used as the joining QR-code slide during the waiting phase
+    $joiningImage = ($quiz['phase'] === 'waiting' && count($introImages) > 0)
+        ? $introImages[count($introImages) - 1]
+        : null;
+
     return [
         'phase'                  => $quiz['phase'],
         'quizTitle'              => $questions['title'] ?? 'Kahootino Quiz',
@@ -146,6 +152,7 @@ function build_state_array($quiz, $token = null) {
         'introImages'            => $introImages,
         'introImageIndex'        => $introImageIndex,
         'currentIntroImage'      => $currentIntroImage,
+        'joiningImage'           => $joiningImage,
         'serverTime'             => date('c'),
         'questionStartTime'      => $quiz['question_start_time'],
         'questionEndTime'        => $quiz['question_end_time'],
