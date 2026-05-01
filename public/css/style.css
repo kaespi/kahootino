@@ -2,7 +2,9 @@ body {
   font-family: system-ui, sans-serif;
   margin: 0;
   padding: 1rem;
+  padding-top: 0;
   background: #f5f5f5;
+  margin-top: -20px;
 }
 
 .hidden { display: none; }
@@ -109,7 +111,7 @@ button {
 
 .host h1 {
   color: #333;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0rem;
 }
 
 .host p {
@@ -118,7 +120,7 @@ button {
 }
 
 #host-controls {
-  margin: 2rem 0;
+  margin: 0.5rem 0;
   padding: 1rem;
   background: #fff;
   border-radius: 4px;
@@ -187,7 +189,7 @@ button {
 
 /* Image Navigation Controls */
 #image-navigation-section {
-  margin: 1.5rem 0;
+  margin: 0.5rem 0;
   padding: 1rem;
   background: #f0f7ff;
   border-radius: 4px;
@@ -315,7 +317,7 @@ section h2 {
   font-weight: bold;
   text-align: center;
   color: #007bff;
-  padding: 2rem 1rem;
+  padding: 0.5rem 1rem;
   background: #f0f7ff;
   border-radius: 8px;
   border: 2px solid #007bff;

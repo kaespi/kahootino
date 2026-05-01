@@ -21,8 +21,6 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
 <body class="host">
   <div id="host-app" data-code="<?php echo htmlspecialchars($code); ?>" data-ably-key="<?php echo htmlspecialchars($ABLY_CLIENT_KEY); ?>">
     <h1>Kahootino Quiz - Host</h1>
-    <p>Quiz-Code: <strong><?php echo htmlspecialchars($code); ?></strong></p>
-    <p>Player-URL / QR: <code><?php echo htmlspecialchars("$URL_TO_QUIZ/public/player.php?code=$code"); ?></code></p>
 
     <div id="host-controls">
       <button data-action="show_question">Nächste Frage anzeigen</button>
@@ -34,11 +32,6 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
     <div id="intro-controls" class="hidden">
       <button data-action="start_intro">Intro starten</button>
       <button data-action="open_for_joining">Zum Beitreten öffnen</button>
-    </div>
-
-    <div id="participants-section">
-      <h2>Teilnehmer (<span id="participants-count">0</span>)</h2>
-      <ul id="participants-list"></ul>
     </div>
 
     <div id="image-navigation-section" class="hidden">
@@ -77,17 +70,15 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
       </div>
     </div>
 
-    <div id="host-status"></div>
-
     <div id="host-content">
-      <section id="questions-section">
-        <h2>Fragen</h2>
-        <ol id="questions-list"></ol>
-      </section>
-
       <section id="countdown-section" class="hidden">
         <h2>Zeit verbleibend</h2>
         <div id="host-countdown" class="host-countdown">-</div>
+      </section>
+
+      <section id="questions-section">
+        <h2>Fragen</h2>
+        <ol id="questions-list"></ol>
       </section>
 
       <section id="standings-section" class="hidden">
@@ -95,6 +86,16 @@ $code = $_GET['code'] ?? $DEFAULT_QUIZ_CODE;
         <ol id="host-standings-list"></ol>
       </section>
     </div>
+
+    <div id="participants-section">
+      <h2>Teilnehmer (<span id="participants-count">0</span>)</h2>
+      <ul id="participants-list"></ul>
+    </div>
+
+    <div id="host-status"></div>
+
+    <p>Quiz-Code: <strong><?php echo htmlspecialchars($code); ?></strong></p>
+    <p>Player-URL / QR: <code><?php echo htmlspecialchars("$URL_TO_QUIZ/public/player.php?code=$code"); ?></code></p>
   </div>
 
   <div id="host-controls2">
