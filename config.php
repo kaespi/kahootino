@@ -116,16 +116,22 @@ function build_state_array($quiz, $token = null) {
     $selectedAnswerIndex = null;
 
     if ($token) {
-        $stmt = db()->prepare("SELECT * FROM player WHERE quiz_id = ? AND cookie_token = ?");
-        $stmt->execute([$quiz['id'], $token]);
+        $stmt = db()->prepare("
+            SELECT p.id, p.nickname, p.score,
+                   a.chosen_option
+            FROM player p
+            LEFT JOIN answer a
+              ON a.player_id     = p.id
+             AND a.quiz_id       = p.quiz_id
+             AND a.question_index = ?
+            WHERE p.quiz_id = ? AND p.cookie_token = ?
+        ");
+        $stmt->execute([$currentIndex, $quiz['id'], $token]);
         $player = $stmt->fetch();
 
-        if ($player && $currentIndex >= 0) {
-            $stmt = db()->prepare("SELECT chosen_option FROM answer WHERE quiz_id = ? AND player_id = ? AND question_index = ?");
-            $stmt->execute([$quiz['id'], $player['id'], $currentIndex]);
-            $answerRow = $stmt->fetch();
-            $hasAnswered = (bool)$answerRow;
-            $selectedAnswerIndex = $hasAnswered ? (int)$answerRow['chosen_option'] : null;
+        if ($player) {
+            $hasAnswered = $player['chosen_option'] !== null;
+            $selectedAnswerIndex = $hasAnswered ? (int)$player['chosen_option'] : null;
         }
     }
 
